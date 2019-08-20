@@ -1,0 +1,39 @@
+g_pkg_flg = -bs-package-name Sumi
+src_root_dir = /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason
+bsc = /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-platform/lib/bsc.exe
+bsdep = /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-platform/lib/bsb_helper.exe
+warnings = -w -30-40+6+7+27+32..39+44+45+101
+bsc_flags = -bs-suffix -nostdlib -I '/Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-platform/lib/ocaml' -color always
+ppx_flags = 
+g_pkg_incls = -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-native/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-fetch/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/@glennsl/bs-json/lib/ocaml
+bs_package_dev_includes = 
+g_ns = 
+bsb_dir_group = 0
+refmt = /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-platform/lib/refmt.exe
+reason_react_jsx = -bs-jsx 3
+refmt_flags = --print binary
+g_lib_incls = -I src/Context -I src/API -I src
+rule build_ast_and_module_sets_from_re
+  command = $bsc -pp "$refmt $refmt_flags" $reason_react_jsx  $ppx_flags $warnings $bsc_flags -c -o $out -bs-syntax-only -bs-binary-ast -impl $in
+  description = [34mBuilding[39m [2m${out}[22m
+build src/App.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/App.re
+rule build_deps
+  command = $bsdep $g_ns -g $bsb_dir_group $in
+  restat = 1
+  description = [34mBuilding[39m [2m${out}[22m
+build src/App.d : build_deps src/App.mlast
+rule re_cmj_cmi
+  command = $bsc $g_pkg_flg  -bs-re-out -bs-super-errors $g_pkg_incls $g_lib_incls $bsc_extra_includes $warnings $bsc_flags $gentypeconfig -o $out -c  $in $postbuild
+  dyndep = $in_e.d
+  restat = 1
+  description = [34mBuilding[39m [2m${out}[22m
+build src/App.cmj |  $src_root_dir/src/App.bs.js src/App.cmi : re_cmj_cmi src/App.mlast ||  src/App.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
+build src/API/LoginAction.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/API/LoginAction.re
+build src/API/LoginAction.d : build_deps src/API/LoginAction.mlast
+build src/API/LoginAction.cmj |  $src_root_dir/src/API/LoginAction.bs.js src/API/LoginAction.cmi : re_cmj_cmi src/API/LoginAction.mlast ||  src/API/LoginAction.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/API
+build src/Context/AuthProvider.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Context/AuthProvider.re
+build src/Context/AuthProvider.d : build_deps src/Context/AuthProvider.mlast
+build src/Context/AuthProvider.cmj |  $src_root_dir/src/Context/AuthProvider.bs.js src/Context/AuthProvider.cmi : re_cmj_cmi src/Context/AuthProvider.mlast ||  src/Context/AuthProvider.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/Context
