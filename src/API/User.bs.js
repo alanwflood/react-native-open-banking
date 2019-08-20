@@ -4,6 +4,21 @@ import * as Block from "bs-platform/lib/es6/block.js";
 import * as Fetch from "bs-fetch/src/Fetch.js";
 import * as Caml_option from "bs-platform/lib/es6/caml_option.js";
 import * as Json_decode from "@glennsl/bs-json/src/Json_decode.bs.js";
+import * as ReactNative from "react-native";
+import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
+
+function errorMessageDecoder(message) {
+  switch (message) {
+    case "Email address should be valid" : 
+        return /* InvalidEmail */2;
+    case "Network request failed" : 
+        return /* NetworkFailure */0;
+    case "Submitted credentials are incorrect" : 
+        return /* InvalidCredentials */1;
+    default:
+      return /* UnknownError */[message];
+  }
+}
 
 function decodeUser(json) {
   return /* Success */Block.__(0, [/* record */[
@@ -20,7 +35,9 @@ function decodeUser(json) {
 }
 
 function decodeError(json) {
-  return /* Fail */Block.__(1, [/* record */[/* message */Json_decode.field("message", Json_decode.string, json)]]);
+  return /* Fail */Block.__(1, [Json_decode.field("message", (function (param) {
+                    return Json_decode.map(errorMessageDecoder, Json_decode.string, param);
+                  }), json)]);
 }
 
 function decodeLogin(json) {
@@ -28,7 +45,7 @@ function decodeLogin(json) {
 }
 
 function decodeFetchError(_error) {
-  return /* Fail */Block.__(1, [/* record */[/* message */(_error.message)]]);
+  return /* Fail */Block.__(1, [errorMessageDecoder((_error.message))]);
 }
 
 function loginRequest(email, password) {
@@ -40,9 +57,25 @@ function loginRequest(email, password) {
                   }, Caml_option.some(JSON.stringify(payload)), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
 }
 
+var NoAuthToken = Caml_exceptions.create("User.Login.NoAuthToken");
+
+function setAuthToken(response) {
+  var match = response.headers.get("x-auth-token");
+  if (match !== null) {
+    Promise.resolve(ReactNative.AsyncStorage.setItem("authToken", match));
+    return /* () */0;
+  } else {
+    throw [
+          NoAuthToken,
+          "No auth token found in server response"
+        ];
+  }
+}
+
 function login(email, password) {
-  return loginRequest(email, password).then((function (prim) {
-                    return prim.json();
+  return loginRequest(email, password).then((function (response) {
+                    setAuthToken(response);
+                    return response.json();
                   })).then((function (json) {
                   return Promise.resolve(Json_decode.either(decodeUser, decodeError)(json));
                 })).catch((function (error) {
@@ -50,13 +83,20 @@ function login(email, password) {
               }));
 }
 
+var Login = /* module */[
+  /* errorMessageDecoder */errorMessageDecoder,
+  /* decodeUser */decodeUser,
+  /* decodeError */decodeError,
+  /* decodeLogin */decodeLogin,
+  /* decodeFetchError */decodeFetchError,
+  /* loginRequest */loginRequest,
+  /* NoAuthToken */NoAuthToken,
+  /* setAuthToken */setAuthToken,
+  /* login */login
+];
+
 export {
-  decodeUser ,
-  decodeError ,
-  decodeLogin ,
-  decodeFetchError ,
-  loginRequest ,
-  login ,
+  Login ,
   
 }
-/* No side effect */
+/* react-native Not a pure module */
