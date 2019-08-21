@@ -76,39 +76,32 @@ function SignIn(Props) {
   var ref = React.useRef(null);
   var match = React.useContext(Auth.context)[/* auth */0];
   var setAuth = match[1];
-  var match$1 = React.useReducer((function (param, action) {
-          var error = param[/* error */2];
-          var loading = param[/* loading */1];
-          var f = param[/* loginFields */0];
+  var match$1 = React.useReducer((function (state, action) {
           switch (action.tag | 0) {
             case 0 : 
+                var init = state[/* loginFields */0];
                 return /* record */[
                         /* loginFields : record */[
                           /* email */action[0],
-                          /* password */f[/* password */1]
+                          /* password */init[/* password */1]
                         ],
-                        /* loading */loading,
-                        /* error */error
+                        /* loading */state[/* loading */1],
+                        /* error */state[/* error */2]
                       ];
             case 1 : 
+                var init$1 = state[/* loginFields */0];
                 return /* record */[
                         /* loginFields : record */[
-                          /* email */f[/* email */0],
+                          /* email */init$1[/* email */0],
                           /* password */action[0]
                         ],
-                        /* loading */loading,
-                        /* error */error
+                        /* loading */state[/* loading */1],
+                        /* error */state[/* error */2]
                       ];
             case 2 : 
                 return /* record */[
-                        /* loginFields */f,
-                        /* loading */action[0],
-                        /* error */error
-                      ];
-            case 3 : 
-                return /* record */[
-                        /* loginFields */f,
-                        /* loading */loading,
+                        /* loginFields */state[/* loginFields */0],
+                        /* loading */state[/* loading */1],
                         /* error */action[0]
                       ];
             
@@ -145,7 +138,7 @@ function SignIn(Props) {
               }));
     }
     tmp.then((function (msg) {
-            return Promise.resolve(Curry._1(dispatch, /* SetError */Block.__(3, [msg])));
+            return Promise.resolve(Curry._1(dispatch, /* SetError */Block.__(2, [msg])));
           }));
     return /* () */0;
   };

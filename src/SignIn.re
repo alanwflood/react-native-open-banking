@@ -58,7 +58,6 @@ let initialState = {
 type action =
   | SetEmail(string)
   | SetPassword(string)
-  | SetLoading(bool)
   | SetError(option(error));
 
 let signInError = optionalError =>
@@ -84,26 +83,23 @@ let make = () => {
 
   let ({loginFields: {email, password}, error}, dispatch) =
     React.useReducer(
-      ({loginFields: f, error, loading}, action) =>
+      (state, action) =>
         switch (action) {
         | SetEmail(email) => {
+            ...state,
             loginFields: {
-              ...f,
+              ...state.loginFields,
               email,
             },
-            loading,
-            error,
           }
         | SetPassword(password) => {
+            ...state,
             loginFields: {
-              ...f,
+              ...state.loginFields,
               password,
             },
-            loading,
-            error,
           }
-        | SetLoading(loading) => {loginFields: f, error, loading}
-        | SetError(error) => {loginFields: f, error, loading}
+        | SetError(error) => {...state, error}
         },
       initialState,
     );
