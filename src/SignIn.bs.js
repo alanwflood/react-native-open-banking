@@ -73,6 +73,7 @@ function signInError(optionalError) {
 }
 
 function SignIn(Props) {
+  var navigation = Props.navigation;
   var ref = React.useRef(null);
   var match = React.useContext(Auth.context)[/* auth */0];
   var setAuth = match[1];
@@ -115,31 +116,32 @@ function SignIn(Props) {
   var submitForm = function (param) {
     var match = $$String.trim(email);
     var match$1 = $$String.trim(password);
-    var tmp;
     var exit = 0;
     if (match === "" && match$1 === "") {
-      tmp = Promise.resolve(/* RequiredEmail */3);
+      Promise.resolve(Curry._1(dispatch, /* SetError */Block.__(2, [/* RequiredEmail */3])));
     } else {
       exit = 1;
     }
     if (exit === 1) {
-      tmp = match$1 === "" ? Promise.resolve(/* RequiredPassword */4) : User.Login[/* login */8](email, password).then((function (result) {
+      if (match$1 === "") {
+        Promise.resolve(Curry._1(dispatch, /* SetError */Block.__(2, [/* RequiredPassword */4])));
+      } else {
+        User.Login[/* login */8](email, password).then((function (result) {
                 var tmp;
                 if (result.tag) {
-                  tmp = result[0];
+                  tmp = Curry._1(dispatch, /* SetError */Block.__(2, [result[0]]));
                 } else {
                   var user = result[0];
                   Curry._1(setAuth, (function (param) {
                           return /* LoggedIn */[user];
                         }));
-                  tmp = undefined;
+                  navigation.navigate("Dashboard");
+                  tmp = /* () */0;
                 }
                 return Promise.resolve(tmp);
               }));
+      }
     }
-    tmp.then((function (msg) {
-            return Promise.resolve(Curry._1(dispatch, /* SetError */Block.__(2, [msg])));
-          }));
     return /* () */0;
   };
   return React.createElement(ReactNative.View, {

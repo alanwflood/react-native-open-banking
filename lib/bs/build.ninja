@@ -5,7 +5,7 @@ bsdep = /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/S
 warnings = -w -30-40+6+7+27+32..39+44+45+101
 bsc_flags = -bs-suffix -nostdlib -I '/Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-platform/lib/ocaml' -color always
 ppx_flags = 
-g_pkg_incls = -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-native/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-fetch/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/@glennsl/bs-json/lib/ocaml
+g_pkg_incls = -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-native/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-navigation/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-fetch/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/@glennsl/bs-json/lib/ocaml
 bs_package_dev_includes = 
 g_ns = 
 bsb_dir_group = 0
@@ -36,6 +36,14 @@ build src/Utils.cmj |  $src_root_dir/src/Utils.bs.js src/Utils.cmi : re_cmj_cmi 
 build src/SignIn.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/SignIn.re
 build src/SignIn.d : build_deps src/SignIn.mlast
 build src/SignIn.cmj |  $src_root_dir/src/SignIn.bs.js src/SignIn.cmi : re_cmj_cmi src/SignIn.mlast ||  src/SignIn.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
+build src/Dashboard.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Dashboard.re
+build src/Dashboard.d : build_deps src/Dashboard.mlast
+build src/Dashboard.cmj |  $src_root_dir/src/Dashboard.bs.js src/Dashboard.cmi : re_cmj_cmi src/Dashboard.mlast ||  src/Dashboard.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
+build src/AppNavigator.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/AppNavigator.re
+build src/AppNavigator.d : build_deps src/AppNavigator.mlast
+build src/AppNavigator.cmj |  $src_root_dir/src/AppNavigator.bs.js src/AppNavigator.cmi : re_cmj_cmi src/AppNavigator.mlast ||  src/AppNavigator.d
   g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
 build src/API/User.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/API/User.re
 build src/API/User.d : build_deps src/API/User.mlast

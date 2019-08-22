@@ -1,4 +1,5 @@
 open ReactNative;
+open ReactNavigation;
 open User.Login;
 
 let styles =
@@ -77,7 +78,7 @@ let signInError = optionalError =>
   );
 
 [@react.component]
-let make = () => {
+let make = (~navigation) => {
   let ref = React.useRef(Js.Nullable.null);
   let (_, setAuth) = React.useContext(Auth.context).Auth.auth;
 
@@ -108,8 +109,8 @@ let make = () => {
     Js.Promise.(
       (
         switch (String.trim(email), String.trim(password)) {
-        | ("", "") => RequiredEmail->Some->resolve
-        | (_, "") => RequiredPassword->Some->resolve
+        | ("", "") => RequiredEmail->Some->SetError->dispatch->resolve
+        | (_, "") => RequiredPassword->Some->SetError->dispatch->resolve
         | (_, _) =>
           User.Login.login(~email, ~password)
           |> then_(result =>
@@ -117,14 +118,13 @@ let make = () => {
                  switch (result) {
                  | Success(user) =>
                    setAuth(_ => Auth.LoggedIn(user));
-                   None;
-                 | Fail(error) => error->Some
+                   navigation->Navigation.navigate("Dashboard");
+                 | Fail(error) => error->Some->SetError->dispatch
                  },
                )
              )
         }
       )
-      |> then_(msg => msg->SetError->dispatch->resolve)
       |> ignore
     );
 
