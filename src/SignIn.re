@@ -30,7 +30,7 @@ let styles =
         style(
           ~marginTop=25.->dp,
           ~backgroundColor="#053CC8",
-          ~width=75.->pct,
+          ~width=85.->pct,
           (),
         ),
     })
@@ -80,8 +80,6 @@ let signInError = optionalError =>
 [@react.component]
 let make = (~navigation) => {
   let ref = React.useRef(Js.Nullable.null);
-  let (_, setAuth) = React.useContext(Auth.context).Auth.auth;
-
   let ({loginFields: {email, password}, error}, dispatch) =
     React.useReducer(
       (state, action) =>
@@ -112,13 +110,12 @@ let make = (~navigation) => {
         | ("", "") => RequiredEmail->Some->SetError->dispatch->resolve
         | (_, "") => RequiredPassword->Some->SetError->dispatch->resolve
         | (_, _) =>
-          User.Login.login(~email, ~password)
+          User.login(~email, ~password)
           |> then_(result =>
                resolve(
                  switch (result) {
-                 | Success(user) =>
-                   setAuth(_ => Auth.LoggedIn(user));
-                   navigation->Navigation.navigate("Dashboard");
+                 | Success(_user) =>
+                   navigation->Navigation.navigate("AuthLoading")
                  | Fail(error) => error->Some->SetError->dispatch
                  },
                )
@@ -156,12 +153,7 @@ let make = (~navigation) => {
     />
     <Text style=styles##errorText> error->signInError </Text>
     <View style=styles##submitButton>
-      <Button
-        title="Sign In"
-        onPress={_ => submitForm()}
-        color="#ffffff"
-        accessibilityLabel="Learn more about this purple button"
-      />
+      <Button title="Sign In" onPress={_ => submitForm()} color="#ffffff" />
     </View>
   </View>;
 };

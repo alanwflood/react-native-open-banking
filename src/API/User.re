@@ -1,7 +1,7 @@
 open ReactNative;
+open ReactNavigation;
 
 module Login = {
-  /* Login data Types */
   type user = {
     createdDate: Js.Date.t,
     name: string,
@@ -10,6 +10,7 @@ module Login = {
     email: string,
   };
 
+  /* Login data Types */
   type error =
     | NetworkFailure
     | InvalidCredentials
@@ -80,24 +81,38 @@ module Login = {
 
   /* Setting x-auth-token in AsyncStorage */
   exception NoAuthToken(string);
-  let setAuthToken = response =>
+  let getAuthToken = response =>
     switch (
       response->Fetch.Response.headers |> Fetch.Headers.get("x-auth-token")
     ) {
-    | Some(token) =>
-      Js.Promise.resolve(AsyncStorage.setItem("authToken", token)) |> ignore
+    | Some(token) => token
     | None => raise(NoAuthToken("No auth token found in server response"))
     };
 
-  /* Login Action */
-  let login = (~email, ~password) =>
-    Js.Promise.(
-      loginRequest(email, password)
-      |> then_(response => {
-           response->setAuthToken;
-           response->Fetch.Response.json;
-         })
-      |> then_(json => json->decodeLogin->resolve)
-      |> catch(error => error->decodeFetchError->resolve)
-    );
+  let storeLoginDetails = (~user, ~authToken) =>
+    Js.Promise.resolve(
+      AsyncStorage.multiSet([|("user", user), ("authToken", authToken)|]),
+    )
+    |> ignore;
+};
+
+/* Login Action */
+let login = (~email, ~password) => {
+  let authToken = ref("");
+  Js.Promise.(
+    Login.loginRequest(email, password)
+    |> then_(response => {
+         authToken := response->Login.getAuthToken;
+         response->Fetch.Response.json;
+       })
+    |> then_(json => {
+         let user = json->Login.decodeLogin;
+         Login.storeLoginDetails(
+           ~user=Js.Json.stringify(json),
+           ~authToken=authToken^,
+         );
+         user->resolve;
+       })
+    |> catch(error => error->Login.decodeFetchError->resolve)
+  );
 };

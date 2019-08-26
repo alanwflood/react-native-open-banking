@@ -59,11 +59,10 @@ function loginRequest(email, password) {
 
 var NoAuthToken = Caml_exceptions.create("User.Login.NoAuthToken");
 
-function setAuthToken(response) {
+function getAuthToken(response) {
   var match = response.headers.get("x-auth-token");
   if (match !== null) {
-    Promise.resolve(ReactNative.AsyncStorage.setItem("authToken", match));
-    return /* () */0;
+    return match;
   } else {
     throw [
           NoAuthToken,
@@ -72,15 +71,18 @@ function setAuthToken(response) {
   }
 }
 
-function login(email, password) {
-  return loginRequest(email, password).then((function (response) {
-                    setAuthToken(response);
-                    return response.json();
-                  })).then((function (json) {
-                  return Promise.resolve(Json_decode.either(decodeUser, decodeError)(json));
-                })).catch((function (error) {
-                return Promise.resolve(decodeFetchError(error));
-              }));
+function storeLoginDetails(user, authToken) {
+  Promise.resolve(ReactNative.AsyncStorage.multiSet(/* array */[
+            /* tuple */[
+              "user",
+              user
+            ],
+            /* tuple */[
+              "authToken",
+              authToken
+            ]
+          ]));
+  return /* () */0;
 }
 
 var Login = /* module */[
@@ -91,12 +93,27 @@ var Login = /* module */[
   /* decodeFetchError */decodeFetchError,
   /* loginRequest */loginRequest,
   /* NoAuthToken */NoAuthToken,
-  /* setAuthToken */setAuthToken,
-  /* login */login
+  /* getAuthToken */getAuthToken,
+  /* storeLoginDetails */storeLoginDetails
 ];
+
+function login(email, password) {
+  var authToken = /* record */[/* contents */""];
+  return loginRequest(email, password).then((function (response) {
+                    authToken[0] = getAuthToken(response);
+                    return response.json();
+                  })).then((function (json) {
+                  var user = Json_decode.either(decodeUser, decodeError)(json);
+                  storeLoginDetails(JSON.stringify(json), authToken[0]);
+                  return Promise.resolve(user);
+                })).catch((function (error) {
+                return Promise.resolve(decodeFetchError(error));
+              }));
+}
 
 export {
   Login ,
+  login ,
   
 }
 /* react-native Not a pure module */

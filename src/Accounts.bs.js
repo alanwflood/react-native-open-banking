@@ -5,24 +5,18 @@ import * as React from "react";
 import * as GlobalStyles from "./GlobalStyles.bs.js";
 import * as ReactNative from "react-native";
 
-function Dashboard(Props) {
-  var navigation = Props.navigation;
+function Accounts(Props) {
   var match = React.useContext(Auth.context)[/* auth */0];
   var user = Auth.currentUserOrRaise(match[0]);
   return React.createElement(ReactNative.View, {
               style: GlobalStyles.styles.container,
-              children: null
-            }, React.createElement(ReactNative.Text, {
-                  children: "Welcome to the dashboard " + user[/* name */1]
-                }), React.createElement(ReactNative.Button, {
-                  onPress: (function (param) {
-                      return Auth.logOut(navigation);
-                    }),
-                  title: "Sign Out"
-                }));
+              children: React.createElement(ReactNative.Text, {
+                    children: "Welcome to the accounts page " + user[/* name */1]
+                  })
+            });
 }
 
-var make = Dashboard;
+var make = Accounts;
 
 export {
   make ,

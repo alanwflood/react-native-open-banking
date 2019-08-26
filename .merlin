@@ -14,6 +14,8 @@ S /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Re
 B /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-fetch/lib/ocaml
 S /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/@glennsl/bs-json/lib/ocaml
 B /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/@glennsl/bs-json/lib/ocaml
+S /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-expo-vector-icons/lib/ocaml
+B /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-expo-vector-icons/lib/ocaml
 S src
 B lib/bs/src
 S src/API

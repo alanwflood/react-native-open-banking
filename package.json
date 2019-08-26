@@ -23,13 +23,15 @@
     "react-native-web": "^0.11.4",
     "react-navigation": "^3.11.1",
     "react-navigation-hooks": "^1.0.1",
+    "reason-expo-vector-icons": "^31.0.1",
     "reason-react": "^0.7.0",
     "reason-react-native": "^0.60.0",
     "reason-react-navigation": "^3.11.0-alpha.0"
   },
   "devDependencies": {
     "@types/react-navigation": "^3.0.8",
-    "babel-preset-expo": "^6.0.0"
+    "babel-preset-expo": "^6.0.0",
+    "bs-react-native": "^0.11.1"
   },
   "private": true
 }

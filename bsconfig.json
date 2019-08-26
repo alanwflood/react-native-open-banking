@@ -20,6 +20,7 @@
     "reason-react-native",
     "reason-react-navigation",
     "bs-fetch",
-    "@glennsl/bs-json"
+    "@glennsl/bs-json",
+    "reason-expo-vector-icons"
   ]
 }

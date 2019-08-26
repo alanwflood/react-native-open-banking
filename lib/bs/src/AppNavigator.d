@@ -1,1 +1,1 @@
-src/AppNavigator.cmj :  src/Dashboard.cmj src/Dashboard.cmi src/SignIn.cmj src/SignIn.cmi
+src/AppNavigator.cmj :  src/Accounts.cmj src/Accounts.cmi src/Context/Auth.cmj src/Context/Auth.cmi src/AuthLoading.cmj src/AuthLoading.cmi src/Dashboard.cmj src/Dashboard.cmi src/SignIn.cmj src/SignIn.cmi
