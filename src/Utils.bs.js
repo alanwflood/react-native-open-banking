@@ -10,8 +10,15 @@ function focusRef(ref) {
   return /* () */0;
 }
 
+function tabBarIcon(element) {
+  return (function (_props) {
+      return element;
+    });
+}
+
 export {
   focusRef ,
+  tabBarIcon ,
   
 }
 /* No side effect */

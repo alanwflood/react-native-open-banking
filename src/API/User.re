@@ -1,5 +1,4 @@
 open ReactNative;
-open ReactNavigation;
 
 module Login = {
   type user = {

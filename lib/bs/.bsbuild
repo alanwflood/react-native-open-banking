@@ -1,9 +1,10 @@
 5.0.6
 1
-10
+12
 App
 Auth
 User
+Icons
 Utils
 SignIn
 Accounts
@@ -11,9 +12,11 @@ Dashboard
 AuthLoading
 AppNavigator
 GlobalStyles
+Institutions
 src/App,04
 src/Context/Auth,04
 src/API/User,04
+src/Icons,04
 src/Utils,04
 src/SignIn,04
 src/Accounts,04
@@ -21,3 +24,4 @@ src/Dashboard,04
 src/AuthLoading,04
 src/AppNavigator,04
 src/GlobalStyles,04
+src/API/Institutions,04

@@ -1,4 +1,5 @@
 open ReactNative;
+open ReactNavigation;
 
 external elementToObj: TextInput.element => Js.t({..}) = "%identity";
 let focusRef = ref =>
@@ -7,3 +8,6 @@ let focusRef = ref =>
   ->Js.Nullable.toOption
   ->Belt.Option.map(ref => ref->elementToObj##focus())
   ->ignore;
+
+let tabBarIcon = element =>
+  NavigationOptions.TabBarIcon.render(_props => element);

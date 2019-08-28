@@ -1,4 +1,21 @@
 open ReactNative;
+
+type colors = {
+  background: string,
+  primary: string,
+  textDefault: string,
+  textLight: string,
+  textDark: string,
+};
+
+let colors = {
+  background: "#F5FCFF",
+  primary: "#2196f3",
+  textDefault: "black",
+  textLight: "#fafafa",
+  textDark: "#212121",
+};
+
 let styles =
   Style.(
     StyleSheet.create({
@@ -7,9 +24,11 @@ let styles =
           ~flex=1.,
           ~justifyContent=`center,
           ~alignItems=`center,
-          ~backgroundColor="#F5FCFF",
+          ~backgroundColor=colors.background,
           (),
         ),
+      "fullWidthContainer":
+        style(~backgroundColor=colors.background, ~flex=1., ()),
       "textInput":
         style(
           ~borderColor="#CCCCCC",

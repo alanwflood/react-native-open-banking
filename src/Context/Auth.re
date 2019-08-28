@@ -58,9 +58,8 @@ let getCurrentUser = (~setAuth) =>
     |> catch(_error => setAuth(_ => LoggedOut)->resolve)
   );
 
-let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth) =>
+let getAuthToken = (~navigation) =>
   Js.Promise.(
-    getCurrentUser(~setAuth),
     AsyncStorage.getItem("authToken")
     |> then_(nullableToken => {
          Js.log2("CHECKING_AUTH_TOKEN", nullableToken);
@@ -69,8 +68,11 @@ let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth) =>
          | Some(_authToken) =>
            resolve(navigation->Navigation.navigate("App"))
          };
-       }),
+       })
   );
+
+let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth) =>
+  Js.Promise.(getCurrentUser(~setAuth), getAuthToken(~navigation));
 
 let logOut = (~navigation: Navigation.t) =>
   Js.Promise.(

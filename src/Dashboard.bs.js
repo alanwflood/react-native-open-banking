@@ -4,6 +4,9 @@ import * as Auth from "./Context/Auth.bs.js";
 import * as React from "react";
 import * as GlobalStyles from "./GlobalStyles.bs.js";
 import * as ReactNative from "react-native";
+import * as VectorIcons from "@expo/vector-icons";
+
+var Ionicons = /* module */[];
 
 function Dashboard(Props) {
   var navigation = Props.navigation;
@@ -22,10 +25,20 @@ function Dashboard(Props) {
                 }));
 }
 
+Dashboard.navigationOptions = {
+  tabBarIcon: (function (_props) {
+      return React.createElement(VectorIcons.AntDesign, {
+                  name: "dashboard",
+                  size: 22
+                });
+    })
+};
+
 var make = Dashboard;
 
 export {
+  Ionicons ,
   make ,
   
 }
-/* Auth Not a pure module */
+/*  Not a pure module */

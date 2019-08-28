@@ -1,4 +1,19 @@
 open ReactNative;
+open ReactNavigation;
+
+module Ionicons = {
+  [@bs.module "@expo/vector-icons"] [@react.component]
+  external make:
+    (
+      ~children: React.element=?,
+      ~name: string=?,
+      ~size: int=?,
+      ~color: string=?,
+      ~style: ReactNative.Style.t=?
+    ) =>
+    React.element =
+    "Ionicons";
+};
 
 [@react.component]
 let make = (~navigation) => {
@@ -10,3 +25,13 @@ let make = (~navigation) => {
     <Button onPress={_ => Auth.logOut(~navigation)} title="Sign Out" />
   </View>;
 };
+make
+->NavigationOptions.setNavigationOptions(
+    NavigationOptions.t(
+      ~tabBarIcon=
+        NavigationOptions.TabBarIcon.render(_props =>
+          <Icons.AntDesign name="dashboard" size=22 />
+        ),
+      (),
+    ),
+  );

@@ -20,8 +20,8 @@ module AuthStack = {
 
 /* Routes that require authentication */
 module AppStack = {
-  let routes = {"Dashboard": Dashboard.make, "Accounts": Accounts.make};
-  let navigator = TabNavigator.Bottom.(make(routes));
+  let routes = {"Accounts": Accounts.make, "Dashboard": Dashboard.make};
+  let navigator = TabNavigator.Bottom.make(routes);
 };
 
 /* Merge the navigators together and by default load the

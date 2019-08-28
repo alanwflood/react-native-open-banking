@@ -22,8 +22,8 @@ var AuthStack = /* module */[
 ];
 
 var routes$1 = {
-  Dashboard: Dashboard.make,
-  Accounts: Accounts.make
+  Accounts: Accounts.make,
+  Dashboard: Dashboard.make
 };
 
 var $$navigator$1 = ReactNavigation.createBottomTabNavigator(routes$1);

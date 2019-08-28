@@ -77,17 +77,21 @@ function getCurrentUser(setAuth) {
               }));
 }
 
+function getAuthToken(navigation) {
+  return ReactNative.AsyncStorage.getItem("authToken").then((function (nullableToken) {
+                console.log("CHECKING_AUTH_TOKEN", nullableToken);
+                if (nullableToken !== null) {
+                  return Promise.resolve((navigation.navigate("App"), /* () */0));
+                } else {
+                  return Promise.resolve((navigation.navigate("SignIn"), /* () */0));
+                }
+              }));
+}
+
 function checkAuthWithRoute(navigation, setAuth) {
   return /* tuple */[
           getCurrentUser(setAuth),
-          ReactNative.AsyncStorage.getItem("authToken").then((function (nullableToken) {
-                  console.log("CHECKING_AUTH_TOKEN", nullableToken);
-                  if (nullableToken !== null) {
-                    return Promise.resolve((navigation.navigate("App"), /* () */0));
-                  } else {
-                    return Promise.resolve((navigation.navigate("SignIn"), /* () */0));
-                  }
-                }))
+          getAuthToken(navigation)
         ];
 }
 
@@ -134,6 +138,7 @@ export {
   currentUserOrRaise ,
   RetrieveUserError$1 as RetrieveUserError,
   getCurrentUser ,
+  getAuthToken ,
   checkAuthWithRoute ,
   logOut ,
   context ,

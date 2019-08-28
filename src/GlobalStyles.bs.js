@@ -10,6 +10,10 @@ var styles = ReactNative.StyleSheet.create({
         flex: 1,
         justifyContent: "center"
       },
+      fullWidthContainer: {
+        backgroundColor: "#F5FCFF",
+        flex: 1
+      },
       textInput: {
         fontSize: 20,
         borderBottomWidth: 1,
@@ -35,7 +39,16 @@ var styles = ReactNative.StyleSheet.create({
       }
     });
 
+var colors = /* record */[
+  /* background */"#F5FCFF",
+  /* primary */"#2196f3",
+  /* textDefault */"black",
+  /* textLight */"#fafafa",
+  /* textDark */"#212121"
+];
+
 export {
+  colors ,
   styles ,
   
 }
