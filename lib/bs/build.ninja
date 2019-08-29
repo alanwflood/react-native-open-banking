@@ -5,14 +5,14 @@ bsdep = /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/S
 warnings = -w -30-40+6+7+27+32..39+44+45+101
 bsc_flags = -bs-suffix -nostdlib -I '/Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-platform/lib/ocaml' -color always
 ppx_flags = 
-g_pkg_incls = -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-native/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-navigation/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-fetch/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/@glennsl/bs-json/lib/ocaml
+g_pkg_incls = -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/@glennsl/bs-json/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-fetch/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-webapi/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-expo/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-native/lib/ocaml -I /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/reason-react-navigation/lib/ocaml
 bs_package_dev_includes = 
 g_ns = 
 bsb_dir_group = 0
 refmt = /Users/al952368/Sites/Work/OpenBanking/ReactNative-open-banking-dublin/Sumi-Reason/node_modules/bs-platform/lib/refmt.exe
 reason_react_jsx = -bs-jsx 3
 refmt_flags = --print binary
-g_lib_incls = -I src/Context -I src/API -I src
+g_lib_incls = -I src/Context -I src/Components -I src/API -I src/Pages -I src
 rule build_ast_and_module_sets_from_re
   command = $bsc -pp "$refmt $refmt_flags" $reason_react_jsx  $ppx_flags $warnings $bsc_flags -c -o $out -bs-syntax-only -bs-binary-ast -impl $in
   description = [34mBuilding[39m [2m${out}[22m
@@ -37,22 +37,6 @@ build src/Utils.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Util
 build src/Utils.d : build_deps src/Utils.mlast
 build src/Utils.cmj |  $src_root_dir/src/Utils.bs.js src/Utils.cmi : re_cmj_cmi src/Utils.mlast ||  src/Utils.d
   g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
-build src/SignIn.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/SignIn.re
-build src/SignIn.d : build_deps src/SignIn.mlast
-build src/SignIn.cmj |  $src_root_dir/src/SignIn.bs.js src/SignIn.cmi : re_cmj_cmi src/SignIn.mlast ||  src/SignIn.d
-  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
-build src/Accounts.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Accounts.re
-build src/Accounts.d : build_deps src/Accounts.mlast
-build src/Accounts.cmj |  $src_root_dir/src/Accounts.bs.js src/Accounts.cmi : re_cmj_cmi src/Accounts.mlast ||  src/Accounts.d
-  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
-build src/Dashboard.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Dashboard.re
-build src/Dashboard.d : build_deps src/Dashboard.mlast
-build src/Dashboard.cmj |  $src_root_dir/src/Dashboard.bs.js src/Dashboard.cmi : re_cmj_cmi src/Dashboard.mlast ||  src/Dashboard.d
-  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
-build src/AuthLoading.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/AuthLoading.re
-build src/AuthLoading.d : build_deps src/AuthLoading.mlast
-build src/AuthLoading.cmj |  $src_root_dir/src/AuthLoading.bs.js src/AuthLoading.cmi : re_cmj_cmi src/AuthLoading.mlast ||  src/AuthLoading.d
-  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
 build src/AppNavigator.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/AppNavigator.re
 build src/AppNavigator.d : build_deps src/AppNavigator.mlast
 build src/AppNavigator.cmj |  $src_root_dir/src/AppNavigator.bs.js src/AppNavigator.cmi : re_cmj_cmi src/AppNavigator.mlast ||  src/AppNavigator.d
@@ -61,6 +45,26 @@ build src/GlobalStyles.mlast : build_ast_and_module_sets_from_re $src_root_dir/s
 build src/GlobalStyles.d : build_deps src/GlobalStyles.mlast
 build src/GlobalStyles.cmj |  $src_root_dir/src/GlobalStyles.bs.js src/GlobalStyles.cmi : re_cmj_cmi src/GlobalStyles.mlast ||  src/GlobalStyles.d
   g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src
+build src/Pages/SignIn.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Pages/SignIn.re
+build src/Pages/SignIn.d : build_deps src/Pages/SignIn.mlast
+build src/Pages/SignIn.cmj |  $src_root_dir/src/Pages/SignIn.bs.js src/Pages/SignIn.cmi : re_cmj_cmi src/Pages/SignIn.mlast ||  src/Pages/SignIn.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/Pages
+build src/Pages/Webview.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Pages/Webview.re
+build src/Pages/Webview.d : build_deps src/Pages/Webview.mlast
+build src/Pages/Webview.cmj |  $src_root_dir/src/Pages/Webview.bs.js src/Pages/Webview.cmi : re_cmj_cmi src/Pages/Webview.mlast ||  src/Pages/Webview.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/Pages
+build src/Pages/Accounts.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Pages/Accounts.re
+build src/Pages/Accounts.d : build_deps src/Pages/Accounts.mlast
+build src/Pages/Accounts.cmj |  $src_root_dir/src/Pages/Accounts.bs.js src/Pages/Accounts.cmi : re_cmj_cmi src/Pages/Accounts.mlast ||  src/Pages/Accounts.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/Pages
+build src/Pages/Dashboard.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Pages/Dashboard.re
+build src/Pages/Dashboard.d : build_deps src/Pages/Dashboard.mlast
+build src/Pages/Dashboard.cmj |  $src_root_dir/src/Pages/Dashboard.bs.js src/Pages/Dashboard.cmi : re_cmj_cmi src/Pages/Dashboard.mlast ||  src/Pages/Dashboard.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/Pages
+build src/Pages/AuthLoading.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Pages/AuthLoading.re
+build src/Pages/AuthLoading.d : build_deps src/Pages/AuthLoading.mlast
+build src/Pages/AuthLoading.cmj |  $src_root_dir/src/Pages/AuthLoading.bs.js src/Pages/AuthLoading.cmi : re_cmj_cmi src/Pages/AuthLoading.mlast ||  src/Pages/AuthLoading.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/Pages
 build src/API/User.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/API/User.re
 build src/API/User.d : build_deps src/API/User.mlast
 build src/API/User.cmj |  $src_root_dir/src/API/User.bs.js src/API/User.cmi : re_cmj_cmi src/API/User.mlast ||  src/API/User.d
@@ -69,6 +73,10 @@ build src/API/Institutions.mlast : build_ast_and_module_sets_from_re $src_root_d
 build src/API/Institutions.d : build_deps src/API/Institutions.mlast
 build src/API/Institutions.cmj |  $src_root_dir/src/API/Institutions.bs.js src/API/Institutions.cmi : re_cmj_cmi src/API/Institutions.mlast ||  src/API/Institutions.d
   g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/API
+build src/Components/LoadingScreen.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Components/LoadingScreen.re
+build src/Components/LoadingScreen.d : build_deps src/Components/LoadingScreen.mlast
+build src/Components/LoadingScreen.cmj |  $src_root_dir/src/Components/LoadingScreen.bs.js src/Components/LoadingScreen.cmi : re_cmj_cmi src/Components/LoadingScreen.mlast ||  src/Components/LoadingScreen.d
+  g_pkg_flg = $g_pkg_flg  -bs-package-output es6:src/Components
 build src/Context/Auth.mlast : build_ast_and_module_sets_from_re $src_root_dir/src/Context/Auth.re
 build src/Context/Auth.d : build_deps src/Context/Auth.mlast
 build src/Context/Auth.cmj |  $src_root_dir/src/Context/Auth.bs.js src/Context/Auth.cmi : re_cmj_cmi src/Context/Auth.mlast ||  src/Context/Auth.d

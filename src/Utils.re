@@ -11,3 +11,6 @@ let focusRef = ref =>
 
 let tabBarIcon = element =>
   NavigationOptions.TabBarIcon.render(_props => element);
+
+[@bs.module "search-params"]
+external parseUrlParams: string => Js.t({..}) = "parse";

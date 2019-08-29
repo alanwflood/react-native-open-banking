@@ -80,24 +80,26 @@ function getCurrentUser(setAuth) {
 function getAuthToken(navigation) {
   return ReactNative.AsyncStorage.getItem("authToken").then((function (nullableToken) {
                 console.log("CHECKING_AUTH_TOKEN", nullableToken);
-                if (nullableToken !== null) {
-                  return Promise.resolve((navigation.navigate("App"), /* () */0));
-                } else {
-                  return Promise.resolve((navigation.navigate("SignIn"), /* () */0));
-                }
+                return Promise.resolve(nullableToken !== null ? nullableToken : (navigation.navigate("SignIn"), ""));
               }));
 }
 
-function checkAuthWithRoute(navigation, setAuth) {
-  return /* tuple */[
-          getCurrentUser(setAuth),
-          getAuthToken(navigation)
-        ];
+function checkAuthWithRoute(navigation, setAuth, setToken) {
+  return Promise.all(/* array */[
+                getCurrentUser(setAuth),
+                getAuthToken(navigation).then((function (token) {
+                        return Promise.resolve(Curry._1(setToken, (function (param) {
+                                          return token;
+                                        })));
+                      }))
+              ]).then((function (param) {
+                return Promise.resolve((navigation.navigate("App"), /* () */0));
+              }));
 }
 
 function logOut(navigation) {
   ReactNative.AsyncStorage.clear().then((function (_result) {
-          return Promise.resolve(Promise.resolve((navigation.navigate("AuthLoading"), /* () */0)));
+          return Promise.resolve((navigation.navigate("SignIn"), /* () */0));
         }));
   return /* () */0;
 }

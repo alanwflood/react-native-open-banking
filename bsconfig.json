@@ -16,10 +16,12 @@
     }
   ],
   "bs-dependencies": [
+    "@glennsl/bs-json",
+    "bs-fetch",
+    "bs-webapi",
+    "reason-expo",
     "reason-react",
     "reason-react-native",
-    "reason-react-navigation",
-    "bs-fetch",
-    "@glennsl/bs-json"
+    "reason-react-navigation"
   ]
 }

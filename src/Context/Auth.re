@@ -63,23 +63,32 @@ let getAuthToken = (~navigation) =>
     AsyncStorage.getItem("authToken")
     |> then_(nullableToken => {
          Js.log2("CHECKING_AUTH_TOKEN", nullableToken);
-         switch (Js.Null.toOption(nullableToken)) {
-         | None => resolve(navigation->Navigation.navigate("SignIn"))
-         | Some(_authToken) =>
-           resolve(navigation->Navigation.navigate("App"))
-         };
+         resolve(
+           switch (Js.Null.toOption(nullableToken)) {
+           | None =>
+             navigation->Navigation.navigate("SignIn");
+             "";
+           | Some(authToken) => authToken
+           },
+         );
        })
   );
 
-let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth) =>
-  Js.Promise.(getCurrentUser(~setAuth), getAuthToken(~navigation));
+/* If these two promises succeed it means we're logged in with a valid user */
+let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth, ~setToken) =>
+  Js.Promise.(
+    all([|
+      getCurrentUser(~setAuth),
+      getAuthToken(~navigation)
+      |> Js.Promise.then_(token => setToken(_ => token)->resolve),
+    |])
+    |> then_(_ => resolve(navigation->Navigation.navigate("App")))
+  );
 
 let logOut = (~navigation: Navigation.t) =>
   Js.Promise.(
     AsyncStorage.clear()
-    |> then_(_result =>
-         navigation->Navigation.navigate("AuthLoading")->resolve |> resolve
-       )
+    |> then_(_result => navigation->Navigation.navigate("SignIn")->resolve)
     |> ignore
   );
 

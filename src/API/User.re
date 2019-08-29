@@ -63,15 +63,16 @@ module Login = {
 
   let loginRequest = (email, password) => {
     let url = "http://localhost:8080/api/authentications";
-    let payload = Js.Dict.empty();
-    Js.Dict.set(payload, "email", Js.Json.string(email));
-    Js.Dict.set(payload, "password", Js.Json.string(password));
+    let payload =
+      Json.Encode.(
+        [("email", email->string), ("password", password->string)]->object_
+      )
+      ->Js.Json.stringify;
     Fetch.fetchWithInit(
       url,
       Fetch.RequestInit.make(
         ~method_=Post,
-        ~body=
-          Fetch.BodyInit.make(payload->Js.Json.object_->Js.Json.stringify),
+        ~body=Fetch.BodyInit.make(payload),
         ~headers=Fetch.HeadersInit.make({"Content-Type": "application/json"}),
         (),
       ),

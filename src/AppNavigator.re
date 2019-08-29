@@ -40,6 +40,7 @@ module SumiAppContainer =
         {
           "App": AppStack.navigator,
           "Auth": AuthStack.navigator,
+          "Webview": Webview.make,
           "AuthLoading": AuthLoading.make,
         },
         SwitchNavigator.config(~initialRouteName="AuthLoading", ()),

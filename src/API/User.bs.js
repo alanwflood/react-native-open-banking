@@ -4,6 +4,7 @@ import * as Block from "bs-platform/lib/es6/block.js";
 import * as Fetch from "bs-fetch/src/Fetch.js";
 import * as Caml_option from "bs-platform/lib/es6/caml_option.js";
 import * as Json_decode from "@glennsl/bs-json/src/Json_decode.bs.js";
+import * as Json_encode from "@glennsl/bs-json/src/Json_encode.bs.js";
 import * as ReactNative from "react-native";
 import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
 
@@ -49,12 +50,22 @@ function decodeFetchError(_error) {
 }
 
 function loginRequest(email, password) {
-  var payload = { };
-  payload["email"] = email;
-  payload["password"] = password;
+  var payload = JSON.stringify(Json_encode.object_(/* :: */[
+            /* tuple */[
+              "email",
+              email
+            ],
+            /* :: */[
+              /* tuple */[
+                "password",
+                password
+              ],
+              /* [] */0
+            ]
+          ]));
   return fetch("http://localhost:8080/api/authentications", Fetch.RequestInit[/* make */0](/* Post */2, {
                     "Content-Type": "application/json"
-                  }, Caml_option.some(JSON.stringify(payload)), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
+                  }, Caml_option.some(payload), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
 }
 
 var NoAuthToken = Caml_exceptions.create("User.Login.NoAuthToken");

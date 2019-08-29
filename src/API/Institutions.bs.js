@@ -2,7 +2,9 @@
 
 import * as Fetch from "bs-fetch/src/Fetch.js";
 import * as Belt_List from "bs-platform/lib/es6/belt_List.js";
+import * as Caml_option from "bs-platform/lib/es6/caml_option.js";
 import * as Json_decode from "@glennsl/bs-json/src/Json_decode.bs.js";
+import * as Json_encode from "@glennsl/bs-json/src/Json_encode.bs.js";
 import * as ReactNative from "react-native";
 import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
 
@@ -67,6 +69,41 @@ function getList(param) {
               }));
 }
 
+function authoriseRequest(authToken, userUuid, institutionId) {
+  var payload = JSON.stringify(Json_encode.object_(/* :: */[
+            /* tuple */[
+              "userUuid",
+              userUuid
+            ],
+            /* :: */[
+              /* tuple */[
+                "institutionId",
+                institutionId
+              ],
+              /* :: */[
+                /* tuple */[
+                  "callback",
+                  "http://localhost:8080"
+                ],
+                /* [] */0
+              ]
+            ]
+          ]));
+  console.log(payload);
+  return fetch("http://localhost:8080/api/institutions/authorize", Fetch.RequestInit[/* make */0](/* Post */2, {
+                    "Content-Type": "application/json",
+                    "x-auth-token": authToken
+                  }, Caml_option.some(payload), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
+}
+
+function authorise(authToken, userUuid, institutionId) {
+  return authoriseRequest(authToken, userUuid, institutionId).then((function (prim) {
+                  return prim.json();
+                })).then((function (json) {
+                return Promise.resolve(Json_decode.field("authorisationUrl", Json_decode.string, json));
+              }));
+}
+
 export {
   decodeMedia ,
   decodeInstitution ,
@@ -74,6 +111,8 @@ export {
   institutionsRequest ,
   RetrieveTokenError ,
   getList ,
+  authoriseRequest ,
+  authorise ,
   
 }
 /* react-native Not a pure module */

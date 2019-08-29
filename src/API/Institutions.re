@@ -70,3 +70,40 @@ let getList = () =>
     |> then_(Fetch.Response.json)
     |> then_(json => json->decodeInstitutions->resolve)
   );
+
+let authoriseRequest = (~authToken, ~userUuid, ~institutionId) => {
+  let url = "http://localhost:8080/api/institutions/authorize";
+  let payload =
+    Json.Encode.(
+      [
+        ("userUuid", userUuid->string),
+        ("institutionId", institutionId->string),
+        ("callback", "http://localhost:8080"->string),
+      ]
+      ->object_
+    )
+    ->Js.Json.stringify;
+  Js.log(payload);
+  Fetch.fetchWithInit(
+    url,
+    Fetch.RequestInit.make(
+      ~method_=Post,
+      ~body=Fetch.BodyInit.make(payload),
+      ~headers=
+        Fetch.HeadersInit.make({
+          "Content-Type": "application/json",
+          "x-auth-token": authToken,
+        }),
+      (),
+    ),
+  );
+};
+
+let authorise = (~authToken, ~userUuid, ~institutionId) =>
+  Js.Promise.(
+    authoriseRequest(~authToken, ~userUuid, ~institutionId)
+    |> then_(Fetch.Response.json)
+    |> then_(json =>
+         Json.Decode.(field("authorisationUrl", string, json))->resolve
+       )
+  );
