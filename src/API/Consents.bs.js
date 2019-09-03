@@ -7,14 +7,14 @@ import * as Json_decode from "@glennsl/bs-json/src/Json_decode.bs.js";
 import * as Json_encode from "@glennsl/bs-json/src/Json_encode.bs.js";
 import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
 
-function consentDecoder(json) {
+function consent(json) {
   return /* record */[
           /* institutionId */Json_decode.field("institutionId", Json_decode.string, json),
           /* status */Json_decode.field("status", Json_decode.string, json)
         ];
 }
 
-function consentAccountDecoder(json) {
+function account(json) {
   return /* record */[
           /* id */Json_decode.field("id", Json_decode.string, json),
           /* institutionId */Json_decode.field("institutionId", Json_decode.string, json),
@@ -24,16 +24,22 @@ function consentAccountDecoder(json) {
         ];
 }
 
-function ammendResponseDecoder(json) {
+function ammendResponse(json) {
   return /* record */[
           /* consents */Json_decode.field("consents", (function (param) {
-                  return Json_decode.list(consentDecoder, param);
+                  return Json_decode.list(consent, param);
                 }), json),
           /* accounts */Json_decode.field("accounts", (function (param) {
-                  return Json_decode.list(consentAccountDecoder, param);
+                  return Json_decode.list(account, param);
                 }), json)
         ];
 }
+
+var Decoder = /* module */[
+  /* consent */consent,
+  /* account */account,
+  /* ammendResponse */ammendResponse
+];
 
 function postConsentAmmend(authToken, userUuid, institutionId, consentToken) {
   var payload = JSON.stringify(Json_encode.object_(/* :: */[
@@ -74,6 +80,11 @@ function getConsents(authToken) {
                   }, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
 }
 
+var $$Request = /* module */[
+  /* postConsentAmmend */postConsentAmmend,
+  /* getConsents */getConsents
+];
+
 var AmmendRequestError = Caml_exceptions.create("Consents.AmmendRequestError");
 
 function ammend(userUuid, institutionId, consentToken) {
@@ -84,12 +95,12 @@ function ammend(userUuid, institutionId, consentToken) {
                     return prim.json();
                   })).then((function (json) {
                   console.log(json);
-                  return Promise.resolve(ammendResponseDecoder(json));
+                  return Promise.resolve(ammendResponse(json));
                 })).catch((function (err) {
                 console.log(err);
                 return Promise.reject([
                             AmmendRequestError,
-                            "Failed to ammend consent for institution"
+                            "Failed to ammend consent for institution" + institutionId
                           ]);
               }));
 }
@@ -99,17 +110,14 @@ function get(param) {
                   return prim.json();
                 })).then((function (json) {
                 return Promise.resolve(Json_decode.field("consents", (function (param) {
-                                  return Json_decode.list(consentDecoder, param);
+                                  return Json_decode.list(consent, param);
                                 }), json));
               }));
 }
 
 export {
-  consentDecoder ,
-  consentAccountDecoder ,
-  ammendResponseDecoder ,
-  postConsentAmmend ,
-  getConsents ,
+  Decoder ,
+  $$Request ,
   AmmendRequestError ,
   ammend ,
   get ,

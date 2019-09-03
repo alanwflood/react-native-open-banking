@@ -128,19 +128,19 @@ function Accounts(Props) {
   var setInstitutions = match[1];
   var institutionsList = match[0];
   var fetchInstitutes = function (param) {
-    Institutions.getList(/* () */0).then((function (list_) {
-              return Promise.resolve(Curry._1(setInstitutions, (function (param) {
-                                return /* GotInstitutions */[list_];
-                              })));
-            })).catch((function (_err) {
-            return Promise.resolve(Curry._1(setInstitutions, (function (param) {
-                              return /* AuthFailed */1;
-                            })));
-          }));
-    return /* () */0;
+    return Institutions.getList(/* () */0).then((function (list_) {
+                    return Promise.resolve(Curry._1(setInstitutions, (function (param) {
+                                      return /* GotInstitutions */[list_];
+                                    })));
+                  })).catch((function (_err) {
+                  return Promise.resolve(Curry._1(setInstitutions, (function (param) {
+                                    return /* AuthFailed */1;
+                                  })));
+                }));
   };
   React.useEffect((function () {
           fetchInstitutes(/* () */0);
+          Institutions.getAuthInstitutes(/* () */0);
           return (function (param) {
                     return /* () */0;
                   });

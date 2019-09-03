@@ -43,8 +43,7 @@ let decodeInstitution = json =>
   };
 
 let decodeInstitutions = json =>
-  json
-  |> Json.Decode.field("institutions", Json.Decode.array(decodeInstitution));
+  json |> Json.Decode.(field("institutions", decodeInstitution->array));
 
 let institutionsRequest = authToken => {
   let url = "http://localhost:8080/api/institutions";
@@ -65,14 +64,10 @@ let institutionsRequest = authToken => {
 exception RetrieveTokenError(string);
 let getList = () =>
   Js.Promise.(
-    all2((
-      Auth.getAuthToken()
-      |> then_(institutionsRequest)
-      |> then_(Fetch.Response.json)
-      |> then_(json => json->decodeInstitutions->resolve),
-      Consents.get(),
-    ))
-    |> then_(val1 => Js.log2(val1)->resolve)
+    Auth.getAuthToken()
+    |> then_(institutionsRequest)
+    |> then_(Fetch.Response.json)
+    |> then_(json => json->decodeInstitutions->resolve)
   );
 
 let authoriseRequest = (authToken, ~userUuid, ~institutionId) => {
@@ -111,4 +106,14 @@ let authorise = (~userUuid, ~institutionId) =>
     |> then_(json =>
          Json.Decode.(field("authorisationUrl", string, json))->resolve
        )
+  );
+
+let getAuthInstitutes = () =>
+  Js.Promise.(
+    all2((getList(), Consents.get()))
+    |> then_(((institutions, consents)) => {
+         Js.log(consents);
+         Array.map(i => List.map(p => p->Js.log, consents), institutions)
+         ->resolve;
+       })
   );

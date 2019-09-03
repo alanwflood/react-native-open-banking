@@ -124,7 +124,8 @@ let make = (~navigation) => {
 
   React.useEffect0(() => {
     /* Fetch institutions on component mount */
-    fetchInstitutes();
+    fetchInstitutes()->ignore;
+    getAuthInstitutes()->ignore;
     Some(() => ());
   });
 
