@@ -3,6 +3,7 @@ open ReactNative;
 type colors = {
   background: string,
   primary: string,
+  warning: string,
   textDefault: string,
   textLight: string,
   textDark: string,
@@ -11,6 +12,7 @@ type colors = {
 let colors = {
   background: "#F5FCFF",
   primary: "#2196f3",
+  warning: "#ffc107",
   textDefault: "black",
   textLight: "#fafafa",
   textDark: "#212121",

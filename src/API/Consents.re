@@ -1,7 +1,27 @@
+type consentStatus =
+  | AwaitingAuthorization
+  | Authorized
+  | Rejected
+  | Revoked
+  | Failed
+  | Expired
+  | Unknown;
+
 type consent = {
   institutionId: string,
-  status: string,
+  status: consentStatus,
 };
+
+let stringToConsentStatus = status =>
+  switch (status) {
+  | "AWAITING_AUTHORIZATION" => AwaitingAuthorization
+  | "AUTHORIZED" => Authorized
+  | "REJECTED" => Rejected
+  | "REVOKED" => Revoked
+  | "FAILED" => Failed
+  | "EXPIRED" => Expired
+  | _ => Unknown
+  };
 
 type consentAccount = {
   id: string,
@@ -20,7 +40,7 @@ module Decoder = {
   let consent = json =>
     Json.Decode.{
       institutionId: json |> field("institutionId", string),
-      status: json |> field("status", string),
+      status: json |> field("status", map(stringToConsentStatus, string)),
     };
 
   let account = json =>

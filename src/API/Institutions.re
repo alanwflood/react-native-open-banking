@@ -1,14 +1,10 @@
-type consentStatus =
-  | Authorized
-  | Unauthorized;
-
 type media = {
   source: string,
   type_: string,
 };
 
 type institution = {
-  status: consentStatus,
+  consentStatus: Consents.consentStatus,
   id: string,
   name: string,
   fullName: string,
@@ -16,7 +12,7 @@ type institution = {
   features: list(string),
 };
 
-type institutions = array(institution);
+type institutions = list(institution);
 
 let decodeMedia = json =>
   Json.Decode.{
@@ -26,7 +22,7 @@ let decodeMedia = json =>
 
 let decodeInstitution = json =>
   Json.Decode.{
-    status: Unauthorized,
+    consentStatus: Consents.AwaitingAuthorization,
     id: json |> field("id", string),
     name: json |> field("name", string),
     fullName: json |> field("fullName", string),
@@ -43,77 +39,94 @@ let decodeInstitution = json =>
   };
 
 let decodeInstitutions = json =>
-  json |> Json.Decode.(field("institutions", decodeInstitution->array));
+  json |> Json.Decode.(field("institutions", decodeInstitution->list));
 
-let institutionsRequest = authToken => {
-  let url = "http://localhost:8080/api/institutions";
-  Fetch.fetchWithInit(
-    url,
-    Fetch.RequestInit.make(
-      ~method_=Get,
-      ~headers=
-        Fetch.HeadersInit.make({
-          "Content-Type": "application/json",
-          "x-auth-token": authToken,
-        }),
-      (),
-    ),
-  );
-};
+module Request = {
+  let institutionsRequest = authToken => {
+    let url = "http://localhost:8080/api/institutions";
+    Fetch.fetchWithInit(
+      url,
+      Fetch.RequestInit.make(
+        ~method_=Get,
+        ~headers=
+          Fetch.HeadersInit.make({
+            "Content-Type": "application/json",
+            "x-auth-token": authToken,
+          }),
+        (),
+      ),
+    );
+  };
 
-exception RetrieveTokenError(string);
-let getList = () =>
-  Js.Promise.(
-    Auth.getAuthToken()
-    |> then_(institutionsRequest)
-    |> then_(Fetch.Response.json)
-    |> then_(json => json->decodeInstitutions->resolve)
-  );
+  let authoriseRequest = (authToken, ~userUuid, ~institutionId) => {
+    let url = "http://localhost:8080/api/institutions/authorize";
+    let payload =
+      Json.Encode.(
+        [
+          ("userUuid", userUuid->string),
+          ("institutionId", institutionId->string),
+          ("callback", "http://localhost:8080"->string),
+        ]
+        ->object_
+      )
+      ->Js.Json.stringify;
+    Js.log(payload);
+    Fetch.fetchWithInit(
+      url,
+      Fetch.RequestInit.make(
+        ~method_=Post,
+        ~body=Fetch.BodyInit.make(payload),
+        ~headers=
+          Fetch.HeadersInit.make({
+            "Content-Type": "application/json",
+            "x-auth-token": authToken,
+          }),
+        (),
+      ),
+    );
+  };
 
-let authoriseRequest = (authToken, ~userUuid, ~institutionId) => {
-  let url = "http://localhost:8080/api/institutions/authorize";
-  let payload =
-    Json.Encode.(
-      [
-        ("userUuid", userUuid->string),
-        ("institutionId", institutionId->string),
-        ("callback", "http://localhost:8080"->string),
-      ]
-      ->object_
-    )
-    ->Js.Json.stringify;
-  Js.log(payload);
-  Fetch.fetchWithInit(
-    url,
-    Fetch.RequestInit.make(
-      ~method_=Post,
-      ~body=Fetch.BodyInit.make(payload),
-      ~headers=
-        Fetch.HeadersInit.make({
-          "Content-Type": "application/json",
-          "x-auth-token": authToken,
-        }),
-      (),
-    ),
-  );
+  exception RetrieveTokenError(string);
+  let getInstitutions = () =>
+    Js.Promise.(
+      Auth.getAuthToken()
+      |> then_(institutionsRequest)
+      |> then_(Fetch.Response.json)
+      |> then_(json => json->decodeInstitutions->resolve)
+    );
 };
 
 let authorise = (~userUuid, ~institutionId) =>
   Js.Promise.(
     Auth.getAuthToken()
-    |> then_(authoriseRequest(~userUuid, ~institutionId))
+    |> then_(Request.authoriseRequest(~userUuid, ~institutionId))
     |> then_(Fetch.Response.json)
     |> then_(json =>
          Json.Decode.(field("authorisationUrl", string, json))->resolve
        )
   );
 
-let getAuthInstitutes = () =>
+let get = () =>
   Js.Promise.(
-    all2((getList(), Consents.get()))
-    |> then_(((institutions, consents)) => {
-         Js.log(consents);
-         Array.map(i => List.map(p => p->Js.log, consents), institutions)
-         ->resolve;
-       })
+    all2((Request.getInstitutions(), Consents.get()))
+    |> then_(((institutions, consents)) =>
+         List.map(
+           (i: institution) => {
+             ...i,
+             consentStatus:
+               switch (
+                 List.find(
+                   (consent: Consents.consent) =>
+                     consent.institutionId == i.id,
+                   consents,
+                 )
+               ) {
+               | exception Not_found => Consents.AwaitingAuthorization
+               | consent => consent.status
+               },
+           },
+           institutions,
+         )
+         ->resolve
+       )
   );

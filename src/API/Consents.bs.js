@@ -7,10 +7,31 @@ import * as Json_decode from "@glennsl/bs-json/src/Json_decode.bs.js";
 import * as Json_encode from "@glennsl/bs-json/src/Json_encode.bs.js";
 import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
 
+function stringToConsentStatus(status) {
+  switch (status) {
+    case "AUTHORIZED" : 
+        return /* Authorized */1;
+    case "AWAITING_AUTHORIZATION" : 
+        return /* AwaitingAuthorization */0;
+    case "EXPIRED" : 
+        return /* Expired */5;
+    case "FAILED" : 
+        return /* Failed */4;
+    case "REJECTED" : 
+        return /* Rejected */2;
+    case "REVOKED" : 
+        return /* Revoked */3;
+    default:
+      return /* Unknown */6;
+  }
+}
+
 function consent(json) {
   return /* record */[
           /* institutionId */Json_decode.field("institutionId", Json_decode.string, json),
-          /* status */Json_decode.field("status", Json_decode.string, json)
+          /* status */Json_decode.field("status", (function (param) {
+                  return Json_decode.map(stringToConsentStatus, Json_decode.string, param);
+                }), json)
         ];
 }
 
@@ -116,6 +137,7 @@ function get(param) {
 }
 
 export {
+  stringToConsentStatus ,
   Decoder ,
   $$Request ,
   AmmendRequestError ,

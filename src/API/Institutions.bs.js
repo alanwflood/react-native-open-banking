@@ -2,7 +2,6 @@
 
 import * as Auth from "../Context/Auth.bs.js";
 import * as List from "bs-platform/lib/es6/list.js";
-import * as $$Array from "bs-platform/lib/es6/array.js";
 import * as Fetch from "bs-fetch/src/Fetch.js";
 import * as Consents from "./Consents.bs.js";
 import * as Belt_List from "bs-platform/lib/es6/belt_List.js";
@@ -10,6 +9,7 @@ import * as Caml_option from "bs-platform/lib/es6/caml_option.js";
 import * as Json_decode from "@glennsl/bs-json/src/Json_decode.bs.js";
 import * as Json_encode from "@glennsl/bs-json/src/Json_encode.bs.js";
 import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
+import * as Caml_builtin_exceptions from "bs-platform/lib/es6/caml_builtin_exceptions.js";
 
 function decodeMedia(json) {
   return /* record */[
@@ -20,7 +20,7 @@ function decodeMedia(json) {
 
 function decodeInstitution(json) {
   return /* record */[
-          /* status : Unauthorized */1,
+          /* consentStatus : AwaitingAuthorization */0,
           /* id */Json_decode.field("id", Json_decode.string, json),
           /* name */Json_decode.field("name", Json_decode.string, json),
           /* fullName */Json_decode.field("fullName", Json_decode.string, json),
@@ -43,7 +43,7 @@ function decodeInstitution(json) {
 
 function decodeInstitutions(json) {
   return Json_decode.field("institutions", (function (param) {
-                return Json_decode.array(decodeInstitution, param);
+                return Json_decode.list(decodeInstitution, param);
               }), json);
 }
 
@@ -52,16 +52,6 @@ function institutionsRequest(authToken) {
                     "Content-Type": "application/json",
                     "x-auth-token": authToken
                   }, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
-}
-
-var RetrieveTokenError = Caml_exceptions.create("Institutions.RetrieveTokenError");
-
-function getList(param) {
-  return Auth.getAuthToken(/* () */0).then(institutionsRequest).then((function (prim) {
-                  return prim.json();
-                })).then((function (json) {
-                return Promise.resolve(decodeInstitutions(json));
-              }));
 }
 
 function authoriseRequest(authToken, userUuid, institutionId) {
@@ -91,6 +81,23 @@ function authoriseRequest(authToken, userUuid, institutionId) {
                   }, Caml_option.some(payload), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
 }
 
+var RetrieveTokenError = Caml_exceptions.create("Institutions.Request.RetrieveTokenError");
+
+function getInstitutions(param) {
+  return Auth.getAuthToken(/* () */0).then(institutionsRequest).then((function (prim) {
+                  return prim.json();
+                })).then((function (json) {
+                return Promise.resolve(decodeInstitutions(json));
+              }));
+}
+
+var $$Request = /* module */[
+  /* institutionsRequest */institutionsRequest,
+  /* authoriseRequest */authoriseRequest,
+  /* RetrieveTokenError */RetrieveTokenError,
+  /* getInstitutions */getInstitutions
+];
+
 function authorise(userUuid, institutionId) {
   return Auth.getAuthToken(/* () */0).then((function (param) {
                     return authoriseRequest(param, userUuid, institutionId);
@@ -101,18 +108,40 @@ function authorise(userUuid, institutionId) {
               }));
 }
 
-function getAuthInstitutes(param) {
+function get(param) {
   return Promise.all(/* tuple */[
-                getList(/* () */0),
+                getInstitutions(/* () */0),
                 Consents.get(/* () */0)
               ]).then((function (param) {
                 var consents = param[1];
-                console.log(consents);
-                return Promise.resolve($$Array.map((function (i) {
-                                  return List.map((function (p) {
-                                                console.log(p);
-                                                return /* () */0;
-                                              }), consents);
+                return Promise.resolve(List.map((function (i) {
+                                  var tmp;
+                                  var exit = 0;
+                                  var consent;
+                                  try {
+                                    consent = List.find((function (consent) {
+                                            return consent[/* institutionId */0] === i[/* id */1];
+                                          }), consents);
+                                    exit = 1;
+                                  }
+                                  catch (exn){
+                                    if (exn === Caml_builtin_exceptions.not_found) {
+                                      tmp = /* AwaitingAuthorization */0;
+                                    } else {
+                                      throw exn;
+                                    }
+                                  }
+                                  if (exit === 1) {
+                                    tmp = consent[/* status */1];
+                                  }
+                                  return /* record */[
+                                          /* consentStatus */tmp,
+                                          /* id */i[/* id */1],
+                                          /* name */i[/* name */2],
+                                          /* fullName */i[/* fullName */3],
+                                          /* media */i[/* media */4],
+                                          /* features */i[/* features */5]
+                                        ];
                                 }), param[0]));
               }));
 }
@@ -121,12 +150,9 @@ export {
   decodeMedia ,
   decodeInstitution ,
   decodeInstitutions ,
-  institutionsRequest ,
-  RetrieveTokenError ,
-  getList ,
-  authoriseRequest ,
+  $$Request ,
   authorise ,
-  getAuthInstitutes ,
+  get ,
   
 }
 /* Auth Not a pure module */

@@ -29,8 +29,29 @@ module Item = {
         "text": style(~fontSize=24., ()),
       })
     );
+
+  let consentImage = (status: Consents.consentStatus) =>
+    Consents.(
+      switch (status) {
+      | Expired =>
+        <Icons.Material
+          name="refresh"
+          size=32
+          color={GlobalStyles.colors.warning}
+        />
+      | Authorized =>
+        <Icons.Material
+          name="check-circle"
+          size=24
+          color={GlobalStyles.colors.primary}
+        />
+      | _ => React.null
+      }
+    );
+
   [@react.component]
-  let make = (~name, ~image, ~institutionId, ~navigation: Navigation.t) => {
+  let make =
+      (~name, ~image, ~status, ~institutionId, ~navigation: Navigation.t) => {
     let (auth, _) = React.useContext(Auth.context).Auth.auth;
     let user = auth->Auth.currentUserOrRaise;
 
@@ -53,6 +74,7 @@ module Item = {
       }>
       <View style=styles##container>
         <Text style=styles##text> name->React.string </Text>
+        <Text> status->consentImage </Text>
         <Image
           style=styles##image
           source=Image.(Source.fromUriSource(uriSource(~uri=image, ())))
@@ -76,33 +98,54 @@ module List = {
           ),
       })
     );
+
   [@react.component]
-  let make = (~institutions: institutions, ~navigation: Navigation.t) =>
+  let make = (~institutions: institutions, ~navigation: Navigation.t) => {
+    let institutionsList = (institutions, ~heading) =>
+      institutions->List.length > 0 ?
+        <>
+          <View style=styles##heading>
+            <Text> heading->React.string </Text>
+          </View>
+          <FlatList
+            data=institutions->Array.of_list
+            bounces=false
+            keyExtractor={({id}, _) => id}
+            renderItem={
+              props =>
+                <Item
+                  navigation
+                  institutionId={props##item.id}
+                  name={props##item.name}
+                  status={props##item.consentStatus}
+                  image={List.hd(props##item.media).source}
+                />
+            }
+          />
+        </> :
+        React.null;
+
+    let paritionedInstitutions =
+      List.partition(i => i.consentStatus == Consents.Expired, institutions);
+
+    let reauth =
+      paritionedInstitutions
+      ->fst
+      ->institutionsList("Some of your accounts required reauthorisation");
+    let authed =
+      paritionedInstitutions
+      ->snd
+      ->institutionsList("Select a bank to link it to your Sumi account");
+
     <View
       style=Style.(
         [|GlobalStyles.styles##fullWidthContainer, styles##listContainer|]
         ->array
       )>
-      <View style=styles##heading>
-        <Text>
-          "Select a bank to link to your Sumi account"->React.string
-        </Text>
-      </View>
-      <FlatList
-        data=institutions
-        bounces=false
-        keyExtractor={({id}, _) => id}
-        renderItem={
-          props =>
-            <Item
-              navigation
-              institutionId={props##item.id}
-              name={props##item.name}
-              image={List.hd(props##item.media).source}
-            />
-        }
-      />
+      reauth
+      authed
     </View>;
+  };
 };
 
 type state =
@@ -117,7 +160,7 @@ let make = (~navigation) => {
   let (institutionsList, setInstitutions) = React.useState(() => Loading);
   let fetchInstitutes = () =>
     Js.Promise.(
-      Institutions.getList()
+      Institutions.get()
       |> then_(list_ => setInstitutions(_ => list_->GotInstitutions)->resolve)
       |> catch(_err => setInstitutions(_ => AuthFailed)->resolve)
     );
@@ -125,7 +168,6 @@ let make = (~navigation) => {
   React.useEffect0(() => {
     /* Fetch institutions on component mount */
     fetchInstitutes()->ignore;
-    getAuthInstitutes()->ignore;
     Some(() => ());
   });
 

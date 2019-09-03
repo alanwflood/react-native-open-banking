@@ -42,6 +42,7 @@ var styles = ReactNative.StyleSheet.create({
 var colors = /* record */[
   /* background */"#F5FCFF",
   /* primary */"#2196f3",
+  /* warning */"#ffc107",
   /* textDefault */"black",
   /* textLight */"#fafafa",
   /* textDark */"#212121"
