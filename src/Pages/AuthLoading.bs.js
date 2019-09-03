@@ -16,7 +16,7 @@ function AuthLoading(Props) {
           return (function (param) {
                     return /* () */0;
                   });
-        }), /* array */[]);
+        }), ([]));
   return React.createElement(LoadingScreen.make, { });
 }
 

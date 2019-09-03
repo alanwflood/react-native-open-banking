@@ -1,9 +1,14 @@
+type consentStatus =
+  | Authorized
+  | Unauthorized;
+
 type media = {
   source: string,
   type_: string,
 };
 
 type institution = {
+  status: consentStatus,
   id: string,
   name: string,
   fullName: string,
@@ -21,6 +26,7 @@ let decodeMedia = json =>
 
 let decodeInstitution = json =>
   Json.Decode.{
+    status: Unauthorized,
     id: json |> field("id", string),
     name: json |> field("name", string),
     fullName: json |> field("fullName", string),
@@ -40,7 +46,7 @@ let decodeInstitutions = json =>
   json
   |> Json.Decode.field("institutions", Json.Decode.array(decodeInstitution));
 
-let institutionsRequest = (~authToken) => {
+let institutionsRequest = authToken => {
   let url = "http://localhost:8080/api/institutions";
   Fetch.fetchWithInit(
     url,
@@ -59,19 +65,17 @@ let institutionsRequest = (~authToken) => {
 exception RetrieveTokenError(string);
 let getList = () =>
   Js.Promise.(
-    ReactNative.AsyncStorage.getItem("authToken")
-    |> then_(nullableToken =>
-         switch (Js.Null.toOption(nullableToken)) {
-         | None => reject(RetrieveTokenError("Token not found"))
-         | Some(token) => token->resolve
-         }
-       )
-    |> then_(authToken => institutionsRequest(~authToken))
-    |> then_(Fetch.Response.json)
-    |> then_(json => json->decodeInstitutions->resolve)
+    all2((
+      Auth.getAuthToken()
+      |> then_(institutionsRequest)
+      |> then_(Fetch.Response.json)
+      |> then_(json => json->decodeInstitutions->resolve),
+      Consents.get(),
+    ))
+    |> then_(val1 => Js.log2(val1)->resolve)
   );
 
-let authoriseRequest = (~authToken, ~userUuid, ~institutionId) => {
+let authoriseRequest = (authToken, ~userUuid, ~institutionId) => {
   let url = "http://localhost:8080/api/institutions/authorize";
   let payload =
     Json.Encode.(
@@ -99,9 +103,10 @@ let authoriseRequest = (~authToken, ~userUuid, ~institutionId) => {
   );
 };
 
-let authorise = (~authToken, ~userUuid, ~institutionId) =>
+let authorise = (~userUuid, ~institutionId) =>
   Js.Promise.(
-    authoriseRequest(~authToken, ~userUuid, ~institutionId)
+    Auth.getAuthToken()
+    |> then_(authoriseRequest(~userUuid, ~institutionId))
     |> then_(Fetch.Response.json)
     |> then_(json =>
          Json.Decode.(field("authorisationUrl", string, json))->resolve

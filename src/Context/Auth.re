@@ -1,5 +1,6 @@
 open ReactNative;
 open ReactNavigation;
+open User.Login;
 
 type token = string;
 
@@ -8,16 +9,11 @@ type authType =
   | LoggedOut;
 
 exception RetrieveUserError(string);
-let currentUser = auth =>
-  switch (auth) {
-  | LoggedIn(user) => user
-  | LoggedOut => raise(RetrieveUserError("user not found"))
-  };
 
-let authToString = thing =>
-  switch (thing) {
-  | LoggedIn(_user) => "Logged in"
-  | LoggedOut => "Logged out"
+let mapUserLoginToAuth = loginStatus =>
+  switch (loginStatus) {
+  | Success(user) => LoggedIn(user)
+  | Fail(_err) => LoggedOut
   };
 
 let isLoggedIn = auth =>
@@ -26,11 +22,6 @@ let isLoggedIn = auth =>
   | LoggedOut => false
   };
 
-type authContext = {
-  auth: (authType, (authType => authType) => unit),
-  token: (token, (token => token) => unit),
-};
-
 let currentUserOrRaise = auth =>
   switch (auth) {
   | LoggedIn(user) => user
@@ -38,51 +29,32 @@ let currentUserOrRaise = auth =>
   };
 
 exception RetrieveUserError(string);
-let getCurrentUser = (~setAuth) =>
+let getCurrentUser = () =>
   Js.Promise.(
     AsyncStorage.getItem("user")
     |> then_(json =>
          switch (json->Js.Null.toOption) {
-         | None =>
-           "Error retrieving user from async storage"->RetrieveUserError->raise
+         | None => LoggedOut->resolve
          | Some(json) =>
-           json->Json.parseOrRaise->User.Login.decodeUser->resolve
+           json
+           ->Json.parseOrRaise
+           ->User.Login.decodeUser
+           ->mapUserLoginToAuth
+           ->resolve
          }
        )
-    |> then_(user =>
-         switch (user) {
-         | User.Login.Success(user) => setAuth(_ => LoggedIn(user))->resolve
-         | User.Login.Fail(_error) => setAuth(_ => LoggedOut)->resolve
+  );
+
+exception RetrieveTokenError(string);
+let getAuthToken = () =>
+  Js.Promise.(
+    ReactNative.AsyncStorage.getItem("authToken")
+    |> then_(nullableToken =>
+         switch (Js.Null.toOption(nullableToken)) {
+         | None => RetrieveTokenError("Token not found")->reject
+         | Some(token) => token->resolve
          }
        )
-    |> catch(_error => setAuth(_ => LoggedOut)->resolve)
-  );
-
-let getAuthToken = (~navigation) =>
-  Js.Promise.(
-    AsyncStorage.getItem("authToken")
-    |> then_(nullableToken => {
-         Js.log2("CHECKING_AUTH_TOKEN", nullableToken);
-         resolve(
-           switch (Js.Null.toOption(nullableToken)) {
-           | None =>
-             navigation->Navigation.navigate("SignIn");
-             "";
-           | Some(authToken) => authToken
-           },
-         );
-       })
-  );
-
-/* If these two promises succeed it means we're logged in with a valid user */
-let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth, ~setToken) =>
-  Js.Promise.(
-    all([|
-      getCurrentUser(~setAuth),
-      getAuthToken(~navigation)
-      |> Js.Promise.then_(token => setToken(_ => token)->resolve),
-    |])
-    |> then_(_ => resolve(navigation->Navigation.navigate("App")))
   );
 
 let logOut = (~navigation: Navigation.t) =>
@@ -91,6 +63,23 @@ let logOut = (~navigation: Navigation.t) =>
     |> then_(_result => navigation->Navigation.navigate("SignIn")->resolve)
     |> ignore
   );
+
+/* If these two promises succeed it means we're logged in with a valid user */
+let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth, ~setToken) =>
+  Js.Promise.(
+    all([|
+      getCurrentUser() |> Js.Promise.then_(user => setAuth(_ => user)->resolve),
+      getAuthToken()
+      |> Js.Promise.then_(token => setToken(_ => token)->resolve),
+    |])
+    |> then_(_ => resolve(navigation->Navigation.navigate("App")))
+    |> catch(_err => logOut(~navigation)->resolve)
+  );
+
+type authContext = {
+  auth: (authType, (authType => authType) => unit),
+  token: (token, (token => token) => unit),
+};
 
 let context =
   React.createContext({auth: (LoggedOut, _ => ()), token: ("", _ => ())});

@@ -9,22 +9,11 @@ import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
 
 var RetrieveUserError = Caml_exceptions.create("Auth.RetrieveUserError");
 
-function currentUser(auth) {
-  if (auth) {
-    return auth[0];
+function mapUserLoginToAuth(loginStatus) {
+  if (loginStatus.tag) {
+    return /* LoggedOut */0;
   } else {
-    throw [
-          RetrieveUserError,
-          "user not found"
-        ];
-  }
-}
-
-function authToString(thing) {
-  if (thing) {
-    return "Logged in";
-  } else {
-    return "Logged out";
+    return /* LoggedIn */[loginStatus[0]];
   }
 }
 
@@ -49,51 +38,28 @@ function currentUserOrRaise(auth) {
 
 var RetrieveUserError$1 = Caml_exceptions.create("Auth.RetrieveUserError");
 
-function getCurrentUser(setAuth) {
+function getCurrentUser(param) {
   return ReactNative.AsyncStorage.getItem("user").then((function (json) {
-                    if (json !== null) {
-                      return Promise.resolve(User.Login[/* decodeUser */1](Json.parseOrRaise(json)));
-                    } else {
-                      throw [
-                            RetrieveUserError$1,
-                            "Error retrieving user from async storage"
-                          ];
-                    }
-                  })).then((function (user) {
-                  if (user.tag) {
-                    return Promise.resolve(Curry._1(setAuth, (function (param) {
-                                      return /* LoggedOut */0;
-                                    })));
-                  } else {
-                    var user$1 = user[0];
-                    return Promise.resolve(Curry._1(setAuth, (function (param) {
-                                      return /* LoggedIn */[user$1];
-                                    })));
-                  }
-                })).catch((function (_error) {
-                return Promise.resolve(Curry._1(setAuth, (function (param) {
-                                  return /* LoggedOut */0;
-                                })));
+                if (json !== null) {
+                  return Promise.resolve(mapUserLoginToAuth(User.Login[/* decodeUser */1](Json.parseOrRaise(json))));
+                } else {
+                  return Promise.resolve(/* LoggedOut */0);
+                }
               }));
 }
 
-function getAuthToken(navigation) {
+var RetrieveTokenError = Caml_exceptions.create("Auth.RetrieveTokenError");
+
+function getAuthToken(param) {
   return ReactNative.AsyncStorage.getItem("authToken").then((function (nullableToken) {
-                console.log("CHECKING_AUTH_TOKEN", nullableToken);
-                return Promise.resolve(nullableToken !== null ? nullableToken : (navigation.navigate("SignIn"), ""));
-              }));
-}
-
-function checkAuthWithRoute(navigation, setAuth, setToken) {
-  return Promise.all(/* array */[
-                getCurrentUser(setAuth),
-                getAuthToken(navigation).then((function (token) {
-                        return Promise.resolve(Curry._1(setToken, (function (param) {
-                                          return token;
-                                        })));
-                      }))
-              ]).then((function (param) {
-                return Promise.resolve((navigation.navigate("App"), /* () */0));
+                if (nullableToken !== null) {
+                  return Promise.resolve(nullableToken);
+                } else {
+                  return Promise.reject([
+                              RetrieveTokenError,
+                              "Token not found"
+                            ]);
+                }
               }));
 }
 
@@ -102,6 +68,25 @@ function logOut(navigation) {
           return Promise.resolve((navigation.navigate("SignIn"), /* () */0));
         }));
   return /* () */0;
+}
+
+function checkAuthWithRoute(navigation, setAuth, setToken) {
+  return Promise.all(/* array */[
+                  getCurrentUser(/* () */0).then((function (user) {
+                          return Promise.resolve(Curry._1(setAuth, (function (param) {
+                                            return user;
+                                          })));
+                        })),
+                  getAuthToken(/* () */0).then((function (token) {
+                          return Promise.resolve(Curry._1(setToken, (function (param) {
+                                            return token;
+                                          })));
+                        }))
+                ]).then((function (param) {
+                  return Promise.resolve((navigation.navigate("App"), /* () */0));
+                })).catch((function (_err) {
+                return Promise.resolve(logOut(navigation));
+              }));
 }
 
 var context = React.createContext(/* record */[
@@ -134,15 +119,15 @@ var Provider = /* module */[
 ];
 
 export {
-  currentUser ,
-  authToString ,
+  mapUserLoginToAuth ,
   isLoggedIn ,
   currentUserOrRaise ,
   RetrieveUserError$1 as RetrieveUserError,
   getCurrentUser ,
+  RetrieveTokenError ,
   getAuthToken ,
-  checkAuthWithRoute ,
   logOut ,
+  checkAuthWithRoute ,
   context ,
   Provider ,
   

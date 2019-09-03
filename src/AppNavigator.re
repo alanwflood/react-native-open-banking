@@ -18,10 +18,44 @@ module AuthStack = {
     );
 };
 
+module AccountsStack = {
+  let routes = {"Accounts": Accounts.make, "Webview": Webview.make};
+  let navigator = StackNavigator.make(routes);
+  navigator
+  ->NavigationOptions.setNavigationOptions(
+      NavigationOptions.t(
+        ~tabBarIcon=
+          NavigationOptions.TabBarIcon.render(props =>
+            <Icons.Material
+              name="account-balance"
+              size=22
+              color=props##tintColor
+            />
+          ),
+        (),
+      ),
+    );
+};
+
 /* Routes that require authentication */
 module AppStack = {
-  let routes = {"Accounts": Accounts.make, "Dashboard": Dashboard.make};
-  let navigator = TabNavigator.Bottom.make(routes);
+  let routes = {
+    "Accounts": AccountsStack.navigator,
+    "Dashboard": Dashboard.make,
+  };
+  let navigator =
+    TabNavigator.(
+      Bottom.(
+        makeWithConfig(
+          routes,
+          config(
+            ~tabBarOptions=
+              tabBarOptions(~activeTintColor=GlobalStyles.colors.primary, ()),
+            (),
+          ),
+        )
+      )
+    );
 };
 
 /* Merge the navigators together and by default load the
@@ -40,7 +74,6 @@ module SumiAppContainer =
         {
           "App": AppStack.navigator,
           "Auth": AuthStack.navigator,
-          "Webview": Webview.make,
           "AuthLoading": AuthLoading.make,
         },
         SwitchNavigator.config(~initialRouteName="AuthLoading", ()),

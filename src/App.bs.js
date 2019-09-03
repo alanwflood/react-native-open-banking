@@ -3,8 +3,6 @@
 import * as Auth from "./Context/Auth.bs.js";
 import * as React from "react";
 import * as AppNavigator from "./AppNavigator.bs.js";
-import * as GlobalStyles from "./GlobalStyles.bs.js";
-import * as ReactNative from "react-native";
 
 function App$app(Props) {
   var match = React.useState((function () {
@@ -24,15 +22,12 @@ function App$app(Props) {
                     token,
                     match$1[1]
                   ]
-                ], null, /* () */0), React.createElement(ReactNative.Text, {
-                  style: GlobalStyles.styles.headingText,
-                  children: Auth.authToString(auth)
-                }), React.createElement(AppNavigator.SumiAppContainer[/* make */0], {
-                  screenProps: {
-                    token: token,
-                    auth: auth
-                  }
-                }));
+                ], React.createElement(AppNavigator.SumiAppContainer[/* make */0], {
+                      screenProps: {
+                        token: token,
+                        auth: auth
+                      }
+                    }), /* () */0));
 }
 
 var app = App$app;

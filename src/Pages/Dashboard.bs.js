@@ -37,10 +37,11 @@ function Dashboard(Props) {
 }
 
 Dashboard.navigationOptions = {
-  tabBarIcon: (function (_props) {
+  tabBarIcon: (function (props) {
       return React.createElement(VectorIcons.AntDesign, {
                   name: "dashboard",
-                  size: 22
+                  size: 22,
+                  color: props.tintColor
                 });
     })
 };

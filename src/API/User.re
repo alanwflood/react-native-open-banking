@@ -79,7 +79,7 @@ module Login = {
     );
   };
 
-  /* Setting x-auth-token in AsyncStorage */
+  /* Getting x-auth-token from response */
   exception NoAuthToken(string);
   let getAuthToken = response =>
     switch (
@@ -89,6 +89,7 @@ module Login = {
     | None => raise(NoAuthToken("No auth token found in server response"))
     };
 
+  /* Storing retrieved details */
   let storeLoginDetails = (~user, ~authToken) =>
     Js.Promise.resolve(
       AsyncStorage.multiSet([|("user", user), ("authToken", authToken)|]),

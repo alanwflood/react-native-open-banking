@@ -2,7 +2,7 @@ open ReactNative;
 open ReactNavigation;
 open Institutions;
 
-module InstitutionItem = {
+module Item = {
   let styles =
     Style.(
       StyleSheet.create({
@@ -33,23 +33,23 @@ module InstitutionItem = {
   let make = (~name, ~image, ~institutionId, ~navigation: Navigation.t) => {
     let (auth, _) = React.useContext(Auth.context).Auth.auth;
     let user = auth->Auth.currentUserOrRaise;
-    let (authToken, _) = React.useContext(Auth.context).Auth.token;
 
     <TouchableHighlight
       style=styles##button
       onPress={
         _ =>
-          Institutions.authorise(
-            ~userUuid=user.uuid,
-            ~authToken,
-            ~institutionId,
+          Js.Promise.(
+            Institutions.authorise(~userUuid=user.uuid, ~institutionId)
+            |> then_(uri =>
+                 navigation
+                 ->Navigation.navigateWithParams(
+                     "Webview",
+                     {"uri": uri, "bankName": name},
+                   )
+                 ->resolve
+               )
+            |> ignore
           )
-          |> Js.Promise.then_(url =>
-               navigation
-               ->Navigation.navigateWithParams("Webview", {"uri": url})
-               ->Js.Promise.resolve
-             )
-          |> ignore
       }>
       <View style=styles##container>
         <Text style=styles##text> name->React.string </Text>
@@ -62,7 +62,7 @@ module InstitutionItem = {
   };
 };
 
-module InstitutionsList = {
+module List = {
   let styles =
     Style.(
       StyleSheet.create({
@@ -94,7 +94,7 @@ module InstitutionsList = {
         keyExtractor={({id}, _) => id}
         renderItem={
           props =>
-            <InstitutionItem
+            <Item
               navigation
               institutionId={props##item.id}
               name={props##item.name}
@@ -110,26 +110,28 @@ type state =
   | AuthFailed
   | GotInstitutions(institutions);
 
+type instituteError = option(string);
+
 [@react.component]
 let make = (~navigation) => {
-  let (auth, _) = React.useContext(Auth.context).Auth.auth;
   let (institutionsList, setInstitutions) = React.useState(() => Loading);
-  let _user = auth->Auth.currentUserOrRaise;
   let fetchInstitutes = () =>
     Js.Promise.(
       Institutions.getList()
       |> then_(list_ => setInstitutions(_ => list_->GotInstitutions)->resolve)
       |> catch(_err => setInstitutions(_ => AuthFailed)->resolve)
-      |> ignore
     );
 
   React.useEffect0(() => {
+    /* Fetch institutions on component mount */
     fetchInstitutes();
     Some(() => ());
   });
 
   React.useEffect1(
     () => {
+      /* If we failed to get the institutions auth has timed out (Probably) */
+      /* TODO: Add additional state type if server is down */
       if (institutionsList == AuthFailed) {
         navigation->Navigation.navigate("SignIn");
       };
@@ -139,19 +141,20 @@ let make = (~navigation) => {
   );
 
   switch (institutionsList) {
-  | Loading => <Text> "Loading"->React.string </Text>
+  | Loading => <LoadingScreen />
   | AuthFailed => React.null
-  | GotInstitutions(institutions) =>
-    <InstitutionsList institutions navigation />
+  | GotInstitutions(institutions) => <List institutions navigation />
   };
 };
 make
-->NavigationOptions.setNavigationOptions(
-    NavigationOptions.t(
-      ~tabBarIcon=
-        NavigationOptions.TabBarIcon.render(_props =>
-          <Icons.Material name="account-balance" size=22 />
-        ),
-      (),
-    ),
+->NavigationOptions.(
+    setNavigationOptions(
+      t(
+        ~headerTitle=
+          NavigationOptions.HeaderTitle.element("Accounts"->React.string),
+        ~headerTitleStyle=Style.(style(~fontWeight=`bold, ())),
+        ~title="Home",
+        (),
+      ),
+    )
   );

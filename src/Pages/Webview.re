@@ -9,32 +9,78 @@ let authSuccess = url =>
 
 [@react.component]
 let make = (~navigation) => {
-  let goBack = () => navigation->Navigation.goBack;
+  /* Navigation Helpers */
+  let getNavParam = param =>
+    navigation->Navigation.getParamWithDefault(param, "");
 
-  let uri =
-    switch (navigation->Navigation.getParam("uri")->Js.Nullable.toOption) {
-    | Some(uri) => uri
+  let uri = getNavParam("uri");
+  let bankName: string = getNavParam("bankName");
+  let goBackWithError = (~message: string) => {
+    Alert.alert(~title="An Error Occured", ~message, ());
+    navigation->Navigation.goBack;
+  };
+  let ammendError = () =>
+    goBackWithError(
+      ~message=
+        bankName
+        ++ "'s authentication system responded with an error, please try again later",
+    );
+
+  let ammendConsent = url => {
+    let params = url->Utils.parseUrlParams;
+    Js.log2("params recieved:", params);
+    switch (params##error->Js.Nullable.toOption) {
+    | Some(error) =>
+      ammendError();
+      Js.log2("Error in params:", error);
     | None =>
-      goBack();
-      "";
+      Js.Promise.(
+        Consents.ammend(
+          ~userUuid=[%raw "params['user-uuid']"],
+          ~institutionId=params##institution,
+          ~consentToken=params##consent,
+        )
+        |> then_(data => data->Js.log->resolve)
+        |> catch(_err => {
+             ammendError();
+             _err->Js.log->resolve;
+           })
+      )
+      |> ignore
     };
+  };
 
   <WebView
     source=WebView.(Source.uri(~uri, ()))
     onError={
-      event => {
-        Js.log(event);
-        navigation->Navigation.navigate("Accounts");
-      }
+      _event =>
+        goBackWithError(
+          ~message=
+            "Failed to reach bank's authentication service, please try again later",
+        )
     }
     renderLoading={_ => <LoadingScreen />}
     onShouldStartLoadWithRequest={
-      e => {
-        if (e##url->authSuccess) {
-          Js.log(e##url->Utils.parseUrlParams);
-        };
-        true;
-      }
+      request =>
+        if (request##url->authSuccess) {
+          request##url->ammendConsent;
+          false;
+        } else {
+          true;
+        }
     }
   />;
 };
+make
+->NavigationOptions.setDynamicNavigationOptions(params => {
+    let title =
+      params##navigation->Navigation.getParamWithDefault("bankName", "");
+    NavigationOptions.t(
+      ~title,
+      ~headerTitleStyle=Style.(style(~fontWeight=`bold, ())),
+      ~headerTintColor=GlobalStyles.colors.textLight,
+      ~headerStyle=
+        Style.(style(~backgroundColor=GlobalStyles.colors.primary, ())),
+      (),
+    );
+  });

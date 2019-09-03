@@ -1,6 +1,6 @@
 5.0.6
 1
-14
+15
 App
 Auth
 User
@@ -9,6 +9,7 @@ Utils
 SignIn
 Webview
 Accounts
+Consents
 Dashboard
 AuthLoading
 AppNavigator
@@ -23,6 +24,7 @@ src/Utils,04
 src/Pages/SignIn,04
 src/Pages/Webview,04
 src/Pages/Accounts,04
+src/API/Consents,04
 src/Pages/Dashboard,04
 src/Pages/AuthLoading,04
 src/AppNavigator,04

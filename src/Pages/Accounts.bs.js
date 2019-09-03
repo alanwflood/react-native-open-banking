@@ -7,8 +7,8 @@ import * as React from "react";
 import * as GlobalStyles from "../GlobalStyles.bs.js";
 import * as Institutions from "../API/Institutions.bs.js";
 import * as ReactNative from "react-native";
+import * as LoadingScreen from "../Components/LoadingScreen.bs.js";
 import * as Style$ReactNative from "reason-react-native/src/apis/Style.bs.js";
-import * as VectorIcons from "@expo/vector-icons";
 
 var styles = ReactNative.StyleSheet.create({
       container: {
@@ -35,21 +35,20 @@ var styles = ReactNative.StyleSheet.create({
       }
     });
 
-function Accounts$InstitutionItem(Props) {
+function Accounts$Item(Props) {
   var name = Props.name;
   var image = Props.image;
   var institutionId = Props.institutionId;
   var navigation = Props.navigation;
   var match = React.useContext(Auth.context)[/* auth */0];
   var user = Auth.currentUserOrRaise(match[0]);
-  var match$1 = React.useContext(Auth.context)[/* token */1];
-  var authToken = match$1[0];
   return React.createElement(ReactNative.TouchableHighlight, {
               style: styles.button,
               onPress: (function (param) {
-                  Institutions.authorise(authToken, user[/* uuid */3], institutionId).then((function (url) {
+                  Institutions.authorise(user[/* uuid */3], institutionId).then((function (uri) {
                           return Promise.resolve((navigation.navigate("Webview", {
-                                            uri: url
+                                            uri: uri,
+                                            bankName: name
                                           }), /* () */0));
                         }));
                   return /* () */0;
@@ -69,9 +68,9 @@ function Accounts$InstitutionItem(Props) {
             });
 }
 
-var InstitutionItem = /* module */[
+var Item = /* module */[
   /* styles */styles,
-  /* make */Accounts$InstitutionItem
+  /* make */Accounts$Item
 ];
 
 var styles$1 = ReactNative.StyleSheet.create({
@@ -85,7 +84,7 @@ var styles$1 = ReactNative.StyleSheet.create({
       }
     });
 
-function Accounts$InstitutionsList(Props) {
+function Accounts$List(Props) {
   var institutions = Props.institutions;
   var navigation = Props.navigation;
   return React.createElement(ReactNative.View, {
@@ -102,13 +101,13 @@ function Accounts$InstitutionsList(Props) {
                 }), React.createElement(ReactNative.FlatList, {
                   data: institutions,
                   keyExtractor: (function (param, param$1) {
-                      return param[/* id */0];
+                      return param[/* id */1];
                     }),
                   renderItem: (function (props) {
-                      return React.createElement(Accounts$InstitutionItem, {
-                                  name: props.item[/* name */1],
-                                  image: List.hd(props.item[/* media */3])[/* source */0],
-                                  institutionId: props.item[/* id */0],
+                      return React.createElement(Accounts$Item, {
+                                  name: props.item[/* name */2],
+                                  image: List.hd(props.item[/* media */4])[/* source */0],
+                                  institutionId: props.item[/* id */1],
                                   navigation: navigation
                                 });
                     }),
@@ -116,20 +115,18 @@ function Accounts$InstitutionsList(Props) {
                 }));
 }
 
-var InstitutionsList = /* module */[
+var List$1 = /* module */[
   /* styles */styles$1,
-  /* make */Accounts$InstitutionsList
+  /* make */Accounts$List
 ];
 
 function Accounts(Props) {
   var navigation = Props.navigation;
-  var match = React.useContext(Auth.context)[/* auth */0];
-  var match$1 = React.useState((function () {
+  var match = React.useState((function () {
           return /* Loading */0;
         }));
-  var setInstitutions = match$1[1];
-  var institutionsList = match$1[0];
-  Auth.currentUserOrRaise(match[0]);
+  var setInstitutions = match[1];
+  var institutionsList = match[0];
   var fetchInstitutes = function (param) {
     Institutions.getList(/* () */0).then((function (list_) {
               return Promise.resolve(Curry._1(setInstitutions, (function (param) {
@@ -160,12 +157,10 @@ function Accounts(Props) {
     if (institutionsList !== 0) {
       return null;
     } else {
-      return React.createElement(ReactNative.Text, {
-                  children: "Loading"
-                });
+      return React.createElement(LoadingScreen.make, { });
     }
   } else {
-    return React.createElement(Accounts$InstitutionsList, {
+    return React.createElement(Accounts$List, {
                 institutions: institutionsList[0],
                 navigation: navigation
               });
@@ -173,19 +168,18 @@ function Accounts(Props) {
 }
 
 Accounts.navigationOptions = {
-  tabBarIcon: (function (_props) {
-      return React.createElement(VectorIcons.MaterialIcons, {
-                  name: "account-balance",
-                  size: 22
-                });
-    })
+  title: "Home",
+  headerTitle: "Accounts",
+  headerTitleStyle: {
+    fontWeight: "bold"
+  }
 };
 
 var make = Accounts;
 
 export {
-  InstitutionItem ,
-  InstitutionsList ,
+  Item ,
+  List$1 as List,
   make ,
   
 }

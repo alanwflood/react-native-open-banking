@@ -31,8 +31,8 @@ make
 ->NavigationOptions.setNavigationOptions(
     NavigationOptions.t(
       ~tabBarIcon=
-        NavigationOptions.TabBarIcon.render(_props =>
-          <Icons.AntDesign name="dashboard" size=22 />
+        NavigationOptions.TabBarIcon.render(props =>
+          <Icons.AntDesign name="dashboard" size=22 color=props##tintColor />
         ),
       (),
     ),
