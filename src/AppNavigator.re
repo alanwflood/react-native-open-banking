@@ -19,8 +19,32 @@ module AuthStack = {
 };
 
 module AccountsStack = {
-  let routes = {"Accounts": Accounts.make, "Webview": Webview.make};
-  let navigator = StackNavigator.make(routes);
+  let routes = {"Accounts": Accounts.navigator, "Webview": Webview.make};
+  let accountsNavigator =
+    StackNavigator.make(routes)
+    ->NavigationOptions.setNavigationOptions(
+        NavigationOptions.t(
+          ~tabBarIcon=
+            NavigationOptions.TabBarIcon.render(props =>
+              <Icons.Material
+                name="account-balance"
+                size=22
+                color=props##tintColor
+              />
+            ),
+          (),
+        ),
+      );
+
+  let navigator =
+    SwitchNavigator.makeWithConfig(
+      {
+        "AccountsLoading": AccountsLoading.make,
+        "Accounts": StackNavigator.make(routes),
+      },
+      SwitchNavigator.config(~initialRouteName="AccountsLoading", ()),
+    );
+
   navigator
   ->NavigationOptions.setNavigationOptions(
       NavigationOptions.t(
@@ -50,7 +74,11 @@ module AppStack = {
           routes,
           config(
             ~tabBarOptions=
-              tabBarOptions(~activeTintColor=GlobalStyles.colors.primary, ()),
+              tabBarOptions(
+                ~activeTintColor=GlobalStyles.colors.primary,
+                ~inactiveTintColor="grey",
+                (),
+              ),
             (),
           ),
         )
@@ -63,7 +91,7 @@ module AppStack = {
  * on the user being logged in or not */
 module SumiAppContainer =
   AppContainer.Make({
-    type screenProps = {. "auth": Auth.authType};
+    type screenProps = {. "auth": Auth.authorization};
 
     let navigator =
       SwitchNavigator.makeWithConfig(

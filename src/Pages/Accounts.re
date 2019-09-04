@@ -2,31 +2,23 @@ open ReactNative;
 open ReactNavigation;
 open Institutions;
 
-module List = {
-  let styles =
-    Style.(
-      StyleSheet.create({
-        "listContainer":
-          style(~justifyContent=`flexStart, ~padding=2.5->pct, ()),
-      })
-    );
+module CurrentAccounts = {
   [@react.component]
-  let make = (~institutions, ~navigation: Navigation.t) => {
-    let (awaitingAuth, otherInstitutions) =
-      List.partition(
-        i => i.consentStatus == Consents.AwaitingAuthorization,
-        institutions,
-      );
+  let make = (~navigation) => {
+    let (institutions, _) =
+      React.useContext(Institution.context).Institution.institutions;
 
-    let (expiredAuth, withAuth) =
-      otherInstitutions
-      |> List.partition(i => i.consentStatus == Consents.Expired);
+    switch (institutions) {
+    | Institution.Got(institutions) =>
+      let filteredInstitutions =
+        List.filter(
+          i => i.consentStatus != Consents.AwaitingAuthorization,
+          institutions,
+        );
 
-    <View
-      style=Style.(
-        [|GlobalStyles.styles##fullWidthContainer, styles##listContainer|]
-        ->array
-      )>
+      let (expiredAuth, withAuth) =
+        filteredInstitutions
+        |> List.partition(i => i.consentStatus == Consents.Expired);
       <AccountsList.List
         institutions={List.append(expiredAuth, withAuth)}
         heading={
@@ -35,70 +27,75 @@ module List = {
             expiredAuth->List.length->string_of_int
             ++ " of your accounts require reauthorisation"
         }
+        canAdd=true
         navigation
-      />
-      <AccountsList.List
-        institutions=awaitingAuth
-        heading=" Select a bank to link it to your Sumi account "
-        navigation
-      />
-    </View>;
+      />;
+    | _ => React.null
+    };
   };
+  make
+  ->NavigationOptions.setNavigationOptions(
+      NavigationOptions.t(~title="Authorized", ()),
+    );
 };
 
-type state =
-  | Loading
-  | AuthFailed
-  | GotInstitutions(institutions);
+module OtherAccounts = {
+  [@react.component]
+  let make = (~navigation) => {
+    let (institutions, _) =
+      React.useContext(Institution.context).Institution.institutions;
 
-type instituteError = option(string);
+    switch (institutions) {
+    | Institution.Got(institutions) =>
+      <AccountsList.List
+        institutions={
+          List.filter(
+            i => i.consentStatus == Consents.AwaitingAuthorization,
+            institutions,
+          )
+        }
+        canAdd=false
+        heading="Select a bank to link it to your Sumi account"
+        navigation
+      />
+    | _ => React.null
+    };
+  };
+  make
+  ->NavigationOptions.setNavigationOptions(
+      NavigationOptions.t(~title="Other", ()),
+    );
+};
 
-[@react.component]
-let make = (~navigation) => {
-  let (institutionsList, setInstitutions) = React.useState(() => Loading);
-  let fetchInstitutes = () =>
-    Js.Promise.(
-      Institutions.get()
-      |> then_(list_ => setInstitutions(_ => list_->GotInstitutions)->resolve)
-      |> catch(error => {
-           Js.log(error);
-           setInstitutions(_ => AuthFailed)->resolve;
-         })
+let navigator =
+  TabNavigator.(
+    MaterialTop.makeWithConfig(
+      {
+        "CurrentAccounts": CurrentAccounts.make,
+        "OtherAccounts": OtherAccounts.make,
+      },
+      TabNavigator.config(
+        ~tabBarOptions=
+          tabBarOptions(
+            ~activeTintColor=GlobalStyles.colors.primary,
+            ~inactiveTintColor="grey",
+            ~style=Style.style(~backgroundColor="white", ()),
+            ~indicatorStyle=
+              Style.style(~backgroundColor=GlobalStyles.colors.primary, ()),
+            (),
+          ),
+        (),
+      ),
     )
-    |> ignore;
-
-  React.useEffect0(() => {
-    /* Fetch institutions on component mount */
-    fetchInstitutes();
-    Some(() => ());
-  });
-
-  React.useEffect1(
-    () => {
-      /* If we failed to get the institutions auth has timed out (Probably) */
-      /* TODO: Add additional state type if server is down */
-      if (institutionsList == AuthFailed) {
-        Auth.logOut(~navigation);
-      };
-      Some(() => ());
-    },
-    [|institutionsList|],
   );
 
-  switch (institutionsList) {
-  | Loading => <LoadingScreen />
-  | AuthFailed => React.null
-  | GotInstitutions(institutions) => <List institutions navigation />
-  };
-};
-make
+navigator
 ->NavigationOptions.(
     setNavigationOptions(
       t(
         ~headerTitle=
           NavigationOptions.HeaderTitle.element("Accounts"->React.string),
         ~headerTitleStyle=Style.(style(~fontWeight=`bold, ())),
-        ~title="Home",
         (),
       ),
     )

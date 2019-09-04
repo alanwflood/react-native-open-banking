@@ -2,7 +2,7 @@ open ReactNavigation;
 
 [@react.component]
 let make = (~navigation: Navigation.t, ~countdown=3) => {
-  let (_user, setUser) = React.useContext(Auth.context).Auth.auth;
+  let (user, setUser) = React.useContext(Auth.context).Auth.auth;
 
   let checkAuthWithRoute = () =>
     Js.Promise.(

@@ -7,6 +7,7 @@ import * as Accounts from "./Pages/Accounts.bs.js";
 import * as Dashboard from "./Pages/Dashboard.bs.js";
 import * as AuthLoading from "./Pages/AuthLoading.bs.js";
 import * as GlobalStyles from "./GlobalStyles.bs.js";
+import * as AccountsLoading from "./Pages/AccountsLoading.bs.js";
 import * as ReactNavigation from "react-navigation";
 import * as VectorIcons from "@expo/vector-icons";
 import * as AppContainer$ReactNavigation from "reason-react-navigation/src/AppContainer.bs.js";
@@ -26,11 +27,26 @@ var AuthStack = /* module */[
 ];
 
 var routes$1 = {
-  Accounts: Accounts.make,
+  Accounts: Accounts.$$navigator,
   Webview: Webview.make
 };
 
-var $$navigator$1 = ReactNavigation.createStackNavigator(routes$1);
+ReactNavigation.createStackNavigator(routes$1).navigationOptions = {
+  tabBarIcon: (function (props) {
+      return React.createElement(VectorIcons.MaterialIcons, {
+                  name: "account-balance",
+                  size: 22,
+                  color: props.tintColor
+                });
+    })
+};
+
+var $$navigator$1 = ReactNavigation.createSwitchNavigator({
+      AccountsLoading: AccountsLoading.make,
+      Accounts: ReactNavigation.createStackNavigator(routes$1)
+    }, {
+      initialRouteName: "AccountsLoading"
+    });
 
 $$navigator$1.navigationOptions = {
   tabBarIcon: (function (props) {
@@ -44,6 +60,7 @@ $$navigator$1.navigationOptions = {
 
 var AccountsStack = /* module */[
   /* routes */routes$1,
+  /* accountsNavigator : () */0,
   /* navigator */$$navigator$1
 ];
 
@@ -54,7 +71,8 @@ var routes$2 = {
 
 var $$navigator$2 = ReactNavigation.createBottomTabNavigator(routes$2, {
       tabBarOptions: {
-        activeTintColor: GlobalStyles.colors[/* primary */1]
+        activeTintColor: GlobalStyles.colors[/* primary */1],
+        inactiveTintColor: "grey"
       }
     });
 

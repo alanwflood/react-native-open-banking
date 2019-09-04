@@ -2,6 +2,7 @@
 
 import * as Auth from "./Context/Auth.bs.js";
 import * as React from "react";
+import * as Institution from "./Context/Institution.bs.js";
 import * as AppNavigator from "./AppNavigator.bs.js";
 
 function App$app(Props) {
@@ -9,14 +10,20 @@ function App$app(Props) {
           return /* LoggedOut */0;
         }));
   var auth = match[0];
+  var match$1 = React.useState((function () {
+          return /* NotAsked */0;
+        }));
   return React.createElement(Auth.Provider[/* make */1], Auth.Provider[/* makeProps */0](/* record */[/* auth : tuple */[
                     auth,
                     match[1]
-                  ]], React.createElement(AppNavigator.SumiAppContainer[/* make */0], {
-                      screenProps: {
-                        auth: auth
-                      }
-                    }), /* () */0));
+                  ]], React.createElement(Institution.Provider[/* make */1], Institution.Provider[/* makeProps */0](/* record */[/* institutions : tuple */[
+                            match$1[0],
+                            match$1[1]
+                          ]], React.createElement(AppNavigator.SumiAppContainer[/* make */0], {
+                              screenProps: {
+                                auth: auth
+                              }
+                            }), /* () */0)), /* () */0));
 }
 
 var app = App$app;

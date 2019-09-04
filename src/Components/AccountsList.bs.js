@@ -99,6 +99,10 @@ var Item = /* module */[
 ];
 
 var styles$1 = ReactNative.StyleSheet.create({
+      listContainer: {
+        justifyContent: "flex-start",
+        padding: Style$ReactNative.pct(2.5)
+      },
       list_: {
         paddingBottom: 45
       },
@@ -107,45 +111,61 @@ var styles$1 = ReactNative.StyleSheet.create({
         borderBottomColor: GlobalStyles.colors[/* primary */1],
         borderBottomWidth: 1,
         paddingBottom: 5
+      },
+      notFound: {
+        textAlign: "center",
+        paddingTop: 25
       }
     });
 
 function AccountsList$List(Props) {
   var institutions = Props.institutions;
   var navigation = Props.navigation;
+  var canAdd = Props.canAdd;
   var heading = Props.heading;
   var match = List.length(institutions) > 0;
-  if (match) {
-    return React.createElement(ReactNative.View, {
-                style: styles$1.list_,
-                children: null
-              }, React.createElement(ReactNative.View, {
-                    style: styles$1.heading,
-                    children: React.createElement(ReactNative.Text, {
-                          style: styles$1.heading,
-                          children: heading
-                        })
-                  }), React.createElement(ReactNative.View, {
-                    children: React.createElement(ReactNative.FlatList, {
-                          data: $$Array.of_list(institutions),
-                          keyExtractor: (function (param, param$1) {
-                              return param[/* id */1];
-                            }),
-                          renderItem: (function (props) {
-                              return React.createElement(AccountsList$Item, {
-                                          name: props.item[/* name */2],
-                                          image: List.hd(props.item[/* media */4])[/* source */0],
-                                          status: props.item[/* consentStatus */0],
-                                          institutionId: props.item[/* id */1],
-                                          navigation: navigation
-                                        });
-                            }),
-                          bounces: false
-                        })
-                  }));
-  } else {
-    return null;
-  }
+  return React.createElement(ReactNative.View, {
+              style: /* array */[
+                GlobalStyles.styles.fullWidthContainer,
+                styles$1.listContainer
+              ],
+              children: React.createElement(ReactNative.View, {
+                    style: styles$1.list_,
+                    children: null
+                  }, React.createElement(ReactNative.View, {
+                        style: styles$1.heading,
+                        children: React.createElement(ReactNative.Text, {
+                              style: styles$1.heading,
+                              children: heading
+                            })
+                      }), React.createElement(ReactNative.View, {
+                        children: match ? React.createElement(ReactNative.FlatList, {
+                                data: $$Array.of_list(institutions),
+                                keyExtractor: (function (param, param$1) {
+                                    return param[/* id */1];
+                                  }),
+                                renderItem: (function (props) {
+                                    return React.createElement(AccountsList$Item, {
+                                                name: props.item[/* name */2],
+                                                image: List.hd(props.item[/* media */4])[/* source */0],
+                                                status: props.item[/* consentStatus */0],
+                                                institutionId: props.item[/* id */1],
+                                                navigation: navigation
+                                              });
+                                  }),
+                                bounces: false
+                              }) : React.createElement(React.Fragment, undefined, React.createElement(ReactNative.Text, {
+                                    style: styles$1.notFound,
+                                    children: "No Accounts Found"
+                                  }), canAdd ? React.createElement(ReactNative.Button, {
+                                      onPress: (function (param) {
+                                          navigation.navigate("OtherAccounts");
+                                          return /* () */0;
+                                        }),
+                                      title: "Link an account to Sumi"
+                                    }) : null)
+                      }))
+            });
 }
 
 var List$1 = /* module */[

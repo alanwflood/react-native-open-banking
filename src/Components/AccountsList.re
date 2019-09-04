@@ -88,6 +88,8 @@ module List = {
   let styles =
     Style.(
       StyleSheet.create({
+        "listContainer":
+          style(~justifyContent=`flexStart, ~padding=2.5->pct, ()),
         "list_": style(~paddingBottom=45.->dp, ()),
         "heading":
           style(
@@ -97,6 +99,7 @@ module List = {
             ~paddingBottom=5.->dp,
             (),
           ),
+        "notFound": style(~textAlign=`center, ~paddingTop=25.->dp, ()),
       })
     );
 
@@ -105,31 +108,56 @@ module List = {
       (
         ~institutions: Institutions.institutions,
         ~navigation: Navigation.t,
+        ~canAdd,
         ~heading,
       ) =>
-    /* This shouldn't show if no institutions are passed */
-    institutions->List.length > 0 ?
-      <View style=styles##list_>
-        <View style=styles##heading>
-          <Text style=styles##heading> heading->React.string </Text>
-        </View>
-        <View>
-          <FlatList
-            data=institutions->Array.of_list
-            bounces=false
-            keyExtractor={({id}, _) => id}
-            renderItem={
-              props =>
-                <Item
-                  navigation
-                  institutionId={props##item.id}
-                  name={props##item.name}
-                  status={props##item.consentStatus}
-                  image={List.hd(props##item.media).source}
-                />
+    <View
+      style=Style.(
+        [|GlobalStyles.styles##fullWidthContainer, styles##listContainer|]
+        ->array
+      )>
+      /* This shouldn't show if no institutions are passed */
+
+        <View style=styles##list_>
+          <View style=styles##heading>
+            <Text style=styles##heading> heading->React.string </Text>
+          </View>
+          <View>
+            {
+              institutions->List.length > 0 ?
+                <FlatList
+                  data=institutions->Array.of_list
+                  bounces=false
+                  keyExtractor={({id}, _) => id}
+                  renderItem={
+                    props =>
+                      <Item
+                        navigation
+                        institutionId={props##item.id}
+                        name={props##item.name}
+                        status={props##item.consentStatus}
+                        image={List.hd(props##item.media).source}
+                      />
+                  }
+                /> :
+                <>
+                  <Text style=styles##notFound>
+                    "No Accounts Found"->React.string
+                  </Text>
+                  {
+                    canAdd ?
+                      <Button
+                        onPress={
+                          _ =>
+                            navigation->Navigation.navigate("OtherAccounts")
+                        }
+                        title="Link an account to Sumi"
+                      /> :
+                      React.null
+                  }
+                </>
             }
-          />
+          </View>
         </View>
-      </View> :
-      React.null;
+      </View>;
 };

@@ -4,7 +4,7 @@ open User.Login;
 
 type token = string;
 
-type authType =
+type authorization =
   | LoggedIn(User.Login.user)
   | LoggedOut;
 
@@ -60,7 +60,9 @@ let getAuthToken = () =>
     getCurrentUser() |> then_(user => user->currentUserOrRaise.token->resolve)
   );
 
-type authContext = {auth: (authType, (authType => authType) => unit)};
+type authContext = {
+  auth: (authorization, (authorization => authorization) => unit),
+};
 
 let context = React.createContext({auth: (LoggedOut, _ => ())});
 
