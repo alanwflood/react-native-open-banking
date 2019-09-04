@@ -62,7 +62,7 @@ var Decoder = /* module */[
   /* ammendResponse */ammendResponse
 ];
 
-function postConsentAmmend(authToken, userUuid, institutionId, consentToken) {
+function postConsentAmmendment(authToken, userUuid, institutionId, consentToken) {
   var payload = JSON.stringify(Json_encode.object_(/* :: */[
             /* tuple */[
               "userUuid",
@@ -102,7 +102,7 @@ function getConsents(authToken) {
 }
 
 var $$Request = /* module */[
-  /* postConsentAmmend */postConsentAmmend,
+  /* postConsentAmmendment */postConsentAmmendment,
   /* getConsents */getConsents
 ];
 
@@ -110,15 +110,13 @@ var AmmendRequestError = Caml_exceptions.create("Consents.AmmendRequestError");
 
 function ammend(userUuid, institutionId, consentToken) {
   var request = function (param) {
-    return postConsentAmmend(param, userUuid, institutionId, consentToken);
+    return postConsentAmmendment(param, userUuid, institutionId, consentToken);
   };
   return Auth.getAuthToken(/* () */0).then(request).then((function (prim) {
                     return prim.json();
                   })).then((function (json) {
-                  console.log(json);
                   return Promise.resolve(ammendResponse(json));
                 })).catch((function (err) {
-                console.log(err);
                 return Promise.reject([
                             AmmendRequestError,
                             "Failed to ammend consent for institution" + institutionId

@@ -18,7 +18,7 @@ function Dashboard(Props) {
               style: GlobalStyles.styles.container,
               children: null
             }, React.createElement(ReactNative.Text, {
-                  children: "Welcome to the dashboard " + user[/* name */1]
+                  children: "Welcome to the dashboard " + user[/* name */2]
                 }), React.createElement(ReactNative.Button, {
                   onPress: (function (param) {
                       return Auth.logOut(navigation);

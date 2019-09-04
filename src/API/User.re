@@ -2,6 +2,7 @@ open ReactNative;
 
 module Login = {
   type user = {
+    token: string,
     createdDate: Js.Date.t,
     name: string,
     id: int,
@@ -22,61 +23,70 @@ module Login = {
     | Success(user)
     | Fail(error);
 
-  let errorMessageDecoder = message =>
-    switch (message) {
-    | "Submitted credentials are incorrect" => InvalidCredentials
-    | "Email address should be valid" => InvalidEmail
-    | "Network request failed" => NetworkFailure
-    | _ => UnknownError(message)
-    };
-
   /* JSON Decoders */
-  let decodeUser = json =>
-    Success(
-      Json.Decode.{
-        createdDate:
-          json
-          |> field("createdDate", map(Js.Date.fromFloat, Json.Decode.float)),
-        name: json |> field("name", string),
-        id: json |> field("id", int),
-        uuid: json |> field("uuid", string),
-        email: json |> field("email", string),
-      },
-    );
+  module Decode = {
+    let stringToError = message =>
+      switch (message) {
+      | "Submitted credentials are incorrect" => InvalidCredentials
+      | "Email address should be valid" => InvalidEmail
+      | "Network request failed" => NetworkFailure
+      | _ => UnknownError(message)
+      };
 
-  let decodeError = json =>
-    Fail(
-      Json.Decode.field(
-        "message",
-        Json.Decode.map(errorMessageDecoder, Json.Decode.string),
-        json,
-      ),
-    );
+    let user = json =>
+      Success(
+        Json.Decode.{
+          /* User token can be an empty string until updated */
+          token: json |> field("token", withDefault("", string)),
+          createdDate:
+            json
+            |> field(
+                 "createdDate",
+                 map(Js.Date.fromFloat, Json.Decode.float),
+               ),
+          name: json |> field("name", string),
+          id: json |> field("id", int),
+          uuid: json |> field("uuid", string),
+          email: json |> field("email", string),
+        },
+      );
 
-  /* Logging in will either return a user or an error */
-  let decodeLogin = json =>
-    json |> Json.Decode.either(decodeUser, decodeError);
+    let error = json =>
+      Fail(
+        Json.Decode.field(
+          "message",
+          Json.Decode.map(stringToError, Json.Decode.string),
+          json,
+        ),
+      );
 
-  /* Fetching methods */
-  let decodeFetchError = _error =>
-    [%raw "_error.message"]->errorMessageDecoder->Fail;
+    /* Logging in will either return a user or an error */
+    let login = json => json |> Json.Decode.either(user, error);
 
-  let loginRequest = (email, password) => {
-    let url = "http://localhost:8080/api/authentications";
-    let payload =
-      Json.Encode.(
-        [("email", email->string), ("password", password->string)]->object_
-      )
-      ->Js.Json.stringify;
-    Fetch.fetchWithInit(
-      url,
-      Fetch.RequestInit.make(
-        ~method_=Post,
-        ~body=Fetch.BodyInit.make(payload),
-        ~headers=Fetch.HeadersInit.make({"Content-Type": "application/json"}),
-        (),
-      ),
-    );
+    /* Convert server error message to an error type */
+    let fetchError = _error => [%raw "_error.message"]->stringToError->Fail;
+  };
+
+  module Request = {
+    let login = (email, password) => {
+      let url = "http://localhost:8080/api/authentications";
+      let payload =
+        Json.Encode.(
+          [("email", email->string), ("password", password->string)]
+          ->object_
+        )
+        ->Js.Json.stringify;
+      Fetch.fetchWithInit(
+        url,
+        Fetch.RequestInit.make(
+          ~method_=Post,
+          ~body=Fetch.BodyInit.make(payload),
+          ~headers=
+            Fetch.HeadersInit.make({"Content-Type": "application/json"}),
+          (),
+        ),
+      );
+    };
   };
 
   /* Getting x-auth-token from response */
@@ -89,31 +99,45 @@ module Login = {
     | None => raise(NoAuthToken("No auth token found in server response"))
     };
 
-  /* Storing retrieved details */
-  let storeLoginDetails = (~user, ~authToken) =>
-    Js.Promise.resolve(
-      AsyncStorage.multiSet([|("user", user), ("authToken", authToken)|]),
-    )
-    |> ignore;
+  module Encode = {
+    let user = user =>
+      Json.Encode.(
+        [
+          ("token", user.token->string),
+          (
+            "createdDate",
+            user.createdDate->Js.Date.getTime->Json.Encode.float,
+          ),
+          ("name", user.name->string),
+          ("id", user.id->int),
+          ("uuid", user.uuid->string),
+          ("email", user.email->string),
+        ]
+        ->object_
+      );
+  };
 };
 
 /* Login Action */
 let login = (~email, ~password) => {
   let authToken = ref("");
   Js.Promise.(
-    Login.loginRequest(email, password)
+    Login.Request.login(email, password)
     |> then_(response => {
          authToken := response->Login.getAuthToken;
          response->Fetch.Response.json;
        })
     |> then_(json => {
-         let user = json->Login.decodeLogin;
-         Login.storeLoginDetails(
-           ~user=Js.Json.stringify(json),
-           ~authToken=authToken^,
-         );
+         let user = json->Login.Decode.login;
+         switch (user) {
+         | Success(userData) =>
+           Login.Encode.user({...userData, token: authToken^})->Json.stringify
+           |> AsyncStorage.setItem("user")
+           |> ignore
+         | Fail(error) => error |> ignore
+         };
          user->resolve;
        })
-    |> catch(error => error->Login.decodeFetchError->resolve)
+    |> catch(error => error->Login.Decode.fetchError->resolve)
   );
 };

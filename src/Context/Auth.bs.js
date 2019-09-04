@@ -41,7 +41,9 @@ var RetrieveUserError$1 = Caml_exceptions.create("Auth.RetrieveUserError");
 function getCurrentUser(param) {
   return ReactNative.AsyncStorage.getItem("user").then((function (json) {
                 if (json !== null) {
-                  return Promise.resolve(mapUserLoginToAuth(User.Login[/* decodeUser */1](Json.parseOrRaise(json))));
+                  var user = mapUserLoginToAuth(Curry._1(User.Login[/* Decode */0][/* user */1], Json.parseOrRaise(json)));
+                  console.log("user in storage:", user);
+                  return Promise.resolve(user);
                 } else {
                   return Promise.resolve(/* LoggedOut */0);
                 }
@@ -51,15 +53,13 @@ function getCurrentUser(param) {
 var RetrieveTokenError = Caml_exceptions.create("Auth.RetrieveTokenError");
 
 function getAuthToken(param) {
-  return ReactNative.AsyncStorage.getItem("authToken").then((function (nullableToken) {
-                if (nullableToken !== null) {
-                  return Promise.resolve(nullableToken);
-                } else {
-                  return Promise.reject([
-                              RetrieveTokenError,
-                              "Token not found"
-                            ]);
-                }
+  return getCurrentUser(/* () */0).then((function (user) {
+                  return Promise.resolve(currentUserOrRaise(user)[/* token */0]);
+                })).catch((function (_err) {
+                throw [
+                      RetrieveTokenError,
+                      "Could not retrieve token for current user"
+                    ];
               }));
 }
 
@@ -70,39 +70,24 @@ function logOut(navigation) {
   return /* () */0;
 }
 
-function checkAuthWithRoute(navigation, setAuth, setToken) {
-  return Promise.all(/* array */[
-                  getCurrentUser(/* () */0).then((function (user) {
-                          return Promise.resolve(Curry._1(setAuth, (function (param) {
-                                            return user;
-                                          })));
-                        })),
-                  getAuthToken(/* () */0).then((function (token) {
-                          return Promise.resolve(Curry._1(setToken, (function (param) {
-                                            return token;
-                                          })));
-                        }))
-                ]).then((function (param) {
+function checkAuthWithRoute(navigation, setUser) {
+  return getCurrentUser(/* () */0).then((function (user) {
+                    return Promise.resolve(Curry._1(setUser, (function (param) {
+                                      return user;
+                                    })));
+                  })).then((function (param) {
                   return Promise.resolve((navigation.navigate("App"), /* () */0));
                 })).catch((function (_err) {
                 return Promise.resolve(logOut(navigation));
               }));
 }
 
-var context = React.createContext(/* record */[
-      /* auth : tuple */[
+var context = React.createContext(/* record */[/* auth : tuple */[
         /* LoggedOut */0,
         (function (param) {
             return /* () */0;
           })
-      ],
-      /* token : tuple */[
-        "",
-        (function (param) {
-            return /* () */0;
-          })
-      ]
-    ]);
+      ]]);
 
 function makeProps(value, children, param) {
   return {

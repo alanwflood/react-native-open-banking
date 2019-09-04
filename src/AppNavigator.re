@@ -63,11 +63,7 @@ module AppStack = {
  * on the user being logged in or not */
 module SumiAppContainer =
   AppContainer.Make({
-    type screenProps = {
-      .
-      "token": Auth.token,
-      "auth": Auth.authType,
-    };
+    type screenProps = {. "auth": Auth.authType};
 
     let navigator =
       SwitchNavigator.makeWithConfig(

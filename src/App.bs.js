@@ -9,22 +9,11 @@ function App$app(Props) {
           return /* LoggedOut */0;
         }));
   var auth = match[0];
-  var match$1 = React.useState((function () {
-          return "";
-        }));
-  var token = match$1[0];
-  return React.createElement(Auth.Provider[/* make */1], Auth.Provider[/* makeProps */0](/* record */[
-                  /* auth : tuple */[
+  return React.createElement(Auth.Provider[/* make */1], Auth.Provider[/* makeProps */0](/* record */[/* auth : tuple */[
                     auth,
                     match[1]
-                  ],
-                  /* token : tuple */[
-                    token,
-                    match$1[1]
-                  ]
-                ], React.createElement(AppNavigator.SumiAppContainer[/* make */0], {
+                  ]], React.createElement(AppNavigator.SumiAppContainer[/* make */0], {
                       screenProps: {
-                        token: token,
                         auth: auth
                       }
                     }), /* () */0));

@@ -56,6 +56,7 @@ module Item = {
     let user = auth->Auth.currentUserOrRaise;
 
     <TouchableHighlight
+      underlayColor={GlobalStyles.colors.primary}
       style=styles##button
       onPress={
         _ =>
@@ -88,12 +89,15 @@ module List = {
   let styles =
     Style.(
       StyleSheet.create({
-        "listContainer": style(~padding=2.5->pct, ()),
+        "list_": style(~paddingBottom=45.->dp, ()),
+        "listContainer":
+          style(~justifyContent=`flexStart, ~padding=2.5->pct, ()),
         "heading":
           style(
-            ~borderBottomWidth=1.,
             ~borderBottomColor=GlobalStyles.colors.primary,
-            ~paddingBottom=10.->dp,
+            ~borderBottomWidth=1.,
+            ~fontWeight=`bold,
+            ~paddingBottom=5.->dp,
             (),
           ),
       })
@@ -101,49 +105,65 @@ module List = {
 
   [@react.component]
   let make = (~institutions: institutions, ~navigation: Navigation.t) => {
+    /* This shouldn't show if the institutions passed in is 0 */
     let institutionsList = (institutions, ~heading) =>
       institutions->List.length > 0 ?
-        <>
+        <View style=styles##list_>
           <View style=styles##heading>
-            <Text> heading->React.string </Text>
+            <Text style=styles##heading> heading->React.string </Text>
           </View>
-          <FlatList
-            data=institutions->Array.of_list
-            bounces=false
-            keyExtractor={({id}, _) => id}
-            renderItem={
-              props =>
-                <Item
-                  navigation
-                  institutionId={props##item.id}
-                  name={props##item.name}
-                  status={props##item.consentStatus}
-                  image={List.hd(props##item.media).source}
-                />
-            }
-          />
-        </> :
+          <View>
+            <FlatList
+              data=institutions->Array.of_list
+              bounces=false
+              keyExtractor={({id}, _) => id}
+              renderItem={
+                props =>
+                  <Item
+                    navigation
+                    institutionId={props##item.id}
+                    name={props##item.name}
+                    status={props##item.consentStatus}
+                    image={List.hd(props##item.media).source}
+                  />
+              }
+            />
+          </View>
+        </View> :
         React.null;
 
-    let paritionedInstitutions =
-      List.partition(i => i.consentStatus == Consents.Expired, institutions);
+    let (awaitingAuth, otherInstitutions) =
+      List.partition(
+        i => i.consentStatus == Consents.AwaitingAuthorization,
+        institutions,
+      );
 
-    let reauth =
-      paritionedInstitutions
-      ->fst
-      ->institutionsList("Some of your accounts required reauthorisation");
-    let authed =
-      paritionedInstitutions
-      ->snd
-      ->institutionsList("Select a bank to link it to your Sumi account");
+    let (expiredAuth, withAuth) =
+      otherInstitutions
+      |> List.partition(i => i.consentStatus == Consents.Expired);
+
+    let authedInstitutions =
+      List.append(expiredAuth, withAuth)
+      ->institutionsList(
+          ~heading=
+            expiredAuth->List.length == 0 ?
+              "Accounts you've linked with Sumi" :
+              expiredAuth->List.length->string_of_int
+              ++ " of your accounts require reauthorisation",
+        );
+    let nonauthedInstitutions =
+      awaitingAuth
+      ->institutionsList(
+          ~heading="Select a bank to link it to your Sumi account",
+        );
 
     <View
       style=Style.(
         [|GlobalStyles.styles##fullWidthContainer, styles##listContainer|]
         ->array
       )>
-      reauth
-      authed
+      authedInstitutions
+      nonauthedInstitutions
     </View>;
   };
 };

@@ -36,11 +36,13 @@ let getCurrentUser = () =>
          switch (json->Js.Null.toOption) {
          | None => LoggedOut->resolve
          | Some(json) =>
-           json
-           ->Json.parseOrRaise
-           ->User.Login.decodeUser
-           ->mapUserLoginToAuth
-           ->resolve
+           let user =
+             json
+             ->Json.parseOrRaise
+             ->User.Login.Decode.user
+             ->mapUserLoginToAuth;
+           Js.log2("user in storage:", user);
+           user->resolve;
          }
        )
   );
@@ -48,12 +50,10 @@ let getCurrentUser = () =>
 exception RetrieveTokenError(string);
 let getAuthToken = () =>
   Js.Promise.(
-    ReactNative.AsyncStorage.getItem("authToken")
-    |> then_(nullableToken =>
-         switch (Js.Null.toOption(nullableToken)) {
-         | None => RetrieveTokenError("Token not found")->reject
-         | Some(token) => token->resolve
-         }
+    getCurrentUser()
+    |> then_(user => user->currentUserOrRaise.token->resolve)
+    |> catch(_err =>
+         "Could not retrieve token for current user"->RetrieveTokenError->raise
        )
   );
 
@@ -65,24 +65,17 @@ let logOut = (~navigation: Navigation.t) =>
   );
 
 /* If these two promises succeed it means we're logged in with a valid user */
-let checkAuthWithRoute = (~navigation: Navigation.t, ~setAuth, ~setToken) =>
+let checkAuthWithRoute = (~navigation: Navigation.t, ~setUser) =>
   Js.Promise.(
-    all([|
-      getCurrentUser() |> Js.Promise.then_(user => setAuth(_ => user)->resolve),
-      getAuthToken()
-      |> Js.Promise.then_(token => setToken(_ => token)->resolve),
-    |])
+    getCurrentUser()
+    |> then_(user => setUser(_ => user)->resolve)
     |> then_(_ => resolve(navigation->Navigation.navigate("App")))
     |> catch(_err => logOut(~navigation)->resolve)
   );
 
-type authContext = {
-  auth: (authType, (authType => authType) => unit),
-  token: (token, (token => token) => unit),
-};
+type authContext = {auth: (authType, (authType => authType) => unit)};
 
-let context =
-  React.createContext({auth: (LoggedOut, _ => ()), token: ("", _ => ())});
+let context = React.createContext({auth: (LoggedOut, _ => ())});
 
 module Provider = {
   let makeProps = (~value, ~children, ()) => {

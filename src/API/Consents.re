@@ -60,7 +60,7 @@ module Decoder = {
 };
 
 module Request = {
-  let postConsentAmmend =
+  let postConsentAmmendment =
       (authToken, ~userUuid, ~institutionId, ~consentToken) => {
     let url = "http://localhost:8080/api/consent/";
     let payload =
@@ -109,22 +109,18 @@ module Request = {
 exception AmmendRequestError(string);
 let ammend = (~userUuid, ~institutionId, ~consentToken) => {
   let request =
-    Request.postConsentAmmend(~userUuid, ~institutionId, ~consentToken);
+    Request.postConsentAmmendment(~userUuid, ~institutionId, ~consentToken);
   Js.Promise.(
     Auth.getAuthToken()
     |> then_(request)
     |> then_(Fetch.Response.json)
-    |> then_(json => {
-         Js.log(json);
-         json->Decoder.ammendResponse->resolve;
-       })
-    |> catch(err => {
-         Js.log(err);
+    |> then_(json => json->Decoder.ammendResponse->resolve)
+    |> catch(err =>
          AmmendRequestError(
            "Failed to ammend consent for institution" ++ institutionId,
          )
-         ->reject;
-       })
+         ->reject
+       )
   );
 };
 

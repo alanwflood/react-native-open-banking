@@ -14,33 +14,34 @@ type institution = {
 
 type institutions = list(institution);
 
-let decodeMedia = json =>
-  Json.Decode.{
-    source: json |> field("source", string),
-    type_: json |> field("type", string),
-  };
+module Decode = {
+  let media = json =>
+    Json.Decode.{
+      source: json |> field("source", string),
+      type_: json |> field("type", string),
+    };
 
-let decodeInstitution = json =>
-  Json.Decode.{
-    consentStatus: Consents.AwaitingAuthorization,
-    id: json |> field("id", string),
-    name: json |> field("name", string),
-    fullName: json |> field("fullName", string),
-    media: json |> field("media", list(decodeMedia)),
-    features:
-      json
-      |> field(
-           "features",
-           map(
-             arr => arr->Belt.List.keepMap(x => x),
-             list(optional(string)),
+  let institution = json =>
+    Json.Decode.{
+      consentStatus: Consents.AwaitingAuthorization,
+      id: json |> field("id", string),
+      name: json |> field("name", string),
+      fullName: json |> field("fullName", string),
+      media: json |> field("media", list(media)),
+      features:
+        json
+        |> field(
+             "features",
+             map(
+               arr => arr->Belt.List.keepMap(x => x),
+               list(optional(string)),
+             ),
            ),
-         ),
-  };
+    };
 
-let decodeInstitutions = json =>
-  json |> Json.Decode.(field("institutions", decodeInstitution->list));
-
+  let institutions = json =>
+    json |> Json.Decode.(field("institutions", institution->list));
+};
 module Request = {
   let institutionsRequest = authToken => {
     let url = "http://localhost:8080/api/institutions";
@@ -70,7 +71,6 @@ module Request = {
         ->object_
       )
       ->Js.Json.stringify;
-    Js.log(payload);
     Fetch.fetchWithInit(
       url,
       Fetch.RequestInit.make(
@@ -92,7 +92,7 @@ module Request = {
       Auth.getAuthToken()
       |> then_(institutionsRequest)
       |> then_(Fetch.Response.json)
-      |> then_(json => json->decodeInstitutions->resolve)
+      |> then_(json => json->Decode.institutions->resolve)
     );
 };
 

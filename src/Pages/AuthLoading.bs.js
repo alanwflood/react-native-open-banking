@@ -8,11 +8,9 @@ function AuthLoading(Props) {
   var navigation = Props.navigation;
   Props.countdown;
   var match = React.useContext(Auth.context)[/* auth */0];
-  var setAuth = match[1];
-  var match$1 = React.useContext(Auth.context)[/* token */1];
-  var setToken = match$1[1];
+  var setUser = match[1];
   React.useEffect((function () {
-          Auth.checkAuthWithRoute(navigation, setAuth, setToken);
+          Auth.checkAuthWithRoute(navigation, setUser);
           return (function (param) {
                     return /* () */0;
                   });

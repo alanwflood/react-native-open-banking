@@ -11,21 +11,21 @@ import * as Json_encode from "@glennsl/bs-json/src/Json_encode.bs.js";
 import * as Caml_exceptions from "bs-platform/lib/es6/caml_exceptions.js";
 import * as Caml_builtin_exceptions from "bs-platform/lib/es6/caml_builtin_exceptions.js";
 
-function decodeMedia(json) {
+function media(json) {
   return /* record */[
           /* source */Json_decode.field("source", Json_decode.string, json),
           /* type_ */Json_decode.field("type", Json_decode.string, json)
         ];
 }
 
-function decodeInstitution(json) {
+function institution(json) {
   return /* record */[
           /* consentStatus : AwaitingAuthorization */0,
           /* id */Json_decode.field("id", Json_decode.string, json),
           /* name */Json_decode.field("name", Json_decode.string, json),
           /* fullName */Json_decode.field("fullName", Json_decode.string, json),
           /* media */Json_decode.field("media", (function (param) {
-                  return Json_decode.list(decodeMedia, param);
+                  return Json_decode.list(media, param);
                 }), json),
           /* features */Json_decode.field("features", (function (param) {
                   return Json_decode.map((function (arr) {
@@ -41,11 +41,17 @@ function decodeInstitution(json) {
         ];
 }
 
-function decodeInstitutions(json) {
+function institutions(json) {
   return Json_decode.field("institutions", (function (param) {
-                return Json_decode.list(decodeInstitution, param);
+                return Json_decode.list(institution, param);
               }), json);
 }
+
+var Decode = /* module */[
+  /* media */media,
+  /* institution */institution,
+  /* institutions */institutions
+];
 
 function institutionsRequest(authToken) {
   return fetch("http://localhost:8080/api/institutions", Fetch.RequestInit[/* make */0](/* Get */0, {
@@ -74,7 +80,6 @@ function authoriseRequest(authToken, userUuid, institutionId) {
               ]
             ]
           ]));
-  console.log(payload);
   return fetch("http://localhost:8080/api/institutions/authorize", Fetch.RequestInit[/* make */0](/* Post */2, {
                     "Content-Type": "application/json",
                     "x-auth-token": authToken
@@ -87,7 +92,7 @@ function getInstitutions(param) {
   return Auth.getAuthToken(/* () */0).then(institutionsRequest).then((function (prim) {
                   return prim.json();
                 })).then((function (json) {
-                return Promise.resolve(decodeInstitutions(json));
+                return Promise.resolve(institutions(json));
               }));
 }
 
@@ -147,9 +152,7 @@ function get(param) {
 }
 
 export {
-  decodeMedia ,
-  decodeInstitution ,
-  decodeInstitutions ,
+  Decode ,
   $$Request ,
   authorise ,
   get ,

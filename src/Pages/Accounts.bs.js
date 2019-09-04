@@ -67,8 +67,9 @@ function Accounts$Item(Props) {
   var user = Auth.currentUserOrRaise(match[0]);
   return React.createElement(ReactNative.TouchableHighlight, {
               style: styles.button,
+              underlayColor: GlobalStyles.colors[/* primary */1],
               onPress: (function (param) {
-                  Institutions.authorise(user[/* uuid */3], institutionId).then((function (uri) {
+                  Institutions.authorise(user[/* uuid */4], institutionId).then((function (uri) {
                           return Promise.resolve((navigation.navigate("Webview", {
                                             uri: uri,
                                             bankName: name
@@ -100,13 +101,18 @@ var Item = /* module */[
 ];
 
 var styles$1 = ReactNative.StyleSheet.create({
+      list_: {
+        paddingBottom: 45
+      },
       listContainer: {
+        justifyContent: "flex-start",
         padding: Style$ReactNative.pct(2.5)
       },
       heading: {
+        fontWeight: "bold",
         borderBottomColor: GlobalStyles.colors[/* primary */1],
         borderBottomWidth: 1,
-        paddingBottom: 10
+        paddingBottom: 5
       }
     });
 
@@ -116,43 +122,54 @@ function Accounts$List(Props) {
   var institutionsList = function (institutions, heading) {
     var match = List.length(institutions) > 0;
     if (match) {
-      return React.createElement(React.Fragment, undefined, React.createElement(ReactNative.View, {
+      return React.createElement(ReactNative.View, {
+                  style: styles$1.list_,
+                  children: null
+                }, React.createElement(ReactNative.View, {
                       style: styles$1.heading,
                       children: React.createElement(ReactNative.Text, {
+                            style: styles$1.heading,
                             children: heading
                           })
-                    }), React.createElement(ReactNative.FlatList, {
-                      data: $$Array.of_list(institutions),
-                      keyExtractor: (function (param, param$1) {
-                          return param[/* id */1];
-                        }),
-                      renderItem: (function (props) {
-                          return React.createElement(Accounts$Item, {
-                                      name: props.item[/* name */2],
-                                      image: List.hd(props.item[/* media */4])[/* source */0],
-                                      status: props.item[/* consentStatus */0],
-                                      institutionId: props.item[/* id */1],
-                                      navigation: navigation
-                                    });
-                        }),
-                      bounces: false
+                    }), React.createElement(ReactNative.View, {
+                      children: React.createElement(ReactNative.FlatList, {
+                            data: $$Array.of_list(institutions),
+                            keyExtractor: (function (param, param$1) {
+                                return param[/* id */1];
+                              }),
+                            renderItem: (function (props) {
+                                return React.createElement(Accounts$Item, {
+                                            name: props.item[/* name */2],
+                                            image: List.hd(props.item[/* media */4])[/* source */0],
+                                            status: props.item[/* consentStatus */0],
+                                            institutionId: props.item[/* id */1],
+                                            navigation: navigation
+                                          });
+                              }),
+                            bounces: false
+                          })
                     }));
     } else {
       return null;
     }
   };
-  var paritionedInstitutions = List.partition((function (i) {
-          return i[/* consentStatus */0] === /* Expired */5;
+  var match = List.partition((function (i) {
+          return i[/* consentStatus */0] === /* AwaitingAuthorization */0;
         }), institutions);
-  var reauth = institutionsList(paritionedInstitutions[0], "Some of your accounts required reauthorisation");
-  var authed = institutionsList(paritionedInstitutions[1], "Select a bank to link it to your Sumi account");
+  var match$1 = List.partition((function (i) {
+          return i[/* consentStatus */0] === /* Expired */5;
+        }), match[1]);
+  var expiredAuth = match$1[0];
+  var match$2 = List.length(expiredAuth) === 0;
+  var authedInstitutions = institutionsList(List.append(expiredAuth, match$1[1]), match$2 ? "Accounts you've linked with Sumi" : String(List.length(expiredAuth)) + " of your accounts require reauthorisation");
+  var nonauthedInstitutions = institutionsList(match[0], "Select a bank to link it to your Sumi account");
   return React.createElement(ReactNative.View, {
               style: /* array */[
                 GlobalStyles.styles.fullWidthContainer,
                 styles$1.listContainer
               ],
               children: null
-            }, reauth, authed);
+            }, authedInstitutions, nonauthedInstitutions);
 }
 
 var List$1 = /* module */[
