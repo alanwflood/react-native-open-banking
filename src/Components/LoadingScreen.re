@@ -14,7 +14,7 @@ let make = (~countdown=3) => {
   });
 
   <View style=styles##container>
-    {count == 0 ? <ActivityIndicator /> : ReasonReact.null}
+    {count < 0 ? <ActivityIndicator /> : ReasonReact.null}
     <StatusBar barStyle=`default />
   </View>;
 };

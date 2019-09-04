@@ -115,7 +115,7 @@ let ammend = (~userUuid, ~institutionId, ~consentToken) => {
     |> then_(request)
     |> then_(Fetch.Response.json)
     |> then_(json => json->Decoder.ammendResponse->resolve)
-    |> catch(err =>
+    |> catch(_err =>
          AmmendRequestError(
            "Failed to ammend consent for institution" ++ institutionId,
          )
@@ -129,8 +129,9 @@ let get = () =>
     Auth.getAuthToken()
     |> then_(Request.getConsents)
     |> then_(Fetch.Response.json)
-    |> then_(json =>
+    |> then_(json => {
+         Js.log(json);
          Json.Decode.(json |> field("consents", Decoder.consent->list))
-         ->resolve
-       )
+         ->resolve;
+       })
   );

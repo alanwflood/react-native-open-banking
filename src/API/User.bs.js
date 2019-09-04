@@ -3,6 +3,7 @@
 import * as Json from "@glennsl/bs-json/src/Json.bs.js";
 import * as Block from "bs-platform/lib/es6/block.js";
 import * as Fetch from "bs-fetch/src/Fetch.js";
+import * as Belt_Option from "bs-platform/lib/es6/belt_Option.js";
 import * as Caml_option from "bs-platform/lib/es6/caml_option.js";
 import * as Json_decode from "@glennsl/bs-json/src/Json_decode.bs.js";
 import * as Json_encode from "@glennsl/bs-json/src/Json_encode.bs.js";
@@ -24,9 +25,9 @@ function stringToError(message) {
 
 function user(json) {
   return /* Success */Block.__(0, [/* record */[
-              /* token */Json_decode.field("token", (function (param) {
-                      return Json_decode.withDefault("", Json_decode.string, param);
-                    }), json),
+              /* token */Belt_Option.getWithDefault(Json_decode.optional((function (param) {
+                          return Json_decode.field("token", Json_decode.string, param);
+                        }), json), ""),
               /* createdDate */Json_decode.field("createdDate", (function (param) {
                       return Json_decode.map((function (prim) {
                                     return new Date(prim);

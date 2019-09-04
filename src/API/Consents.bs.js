@@ -116,7 +116,7 @@ function ammend(userUuid, institutionId, consentToken) {
                     return prim.json();
                   })).then((function (json) {
                   return Promise.resolve(ammendResponse(json));
-                })).catch((function (err) {
+                })).catch((function (_err) {
                 return Promise.reject([
                             AmmendRequestError,
                             "Failed to ammend consent for institution" + institutionId
@@ -128,6 +128,7 @@ function get(param) {
   return Auth.getAuthToken(/* () */0).then(getConsents).then((function (prim) {
                   return prim.json();
                 })).then((function (json) {
+                console.log(json);
                 return Promise.resolve(Json_decode.field("consents", (function (param) {
                                   return Json_decode.list(consent, param);
                                 }), json));

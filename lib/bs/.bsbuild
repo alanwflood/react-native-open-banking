@@ -1,6 +1,6 @@
 5.0.6
 1
-15
+16
 App
 Auth
 User
@@ -12,6 +12,7 @@ Accounts
 Consents
 Dashboard
 AuthLoading
+AccountsList
 AppNavigator
 GlobalStyles
 Institutions
@@ -27,6 +28,7 @@ src/Pages/Accounts,04
 src/API/Consents,04
 src/Pages/Dashboard,04
 src/Pages/AuthLoading,04
+src/Components/AccountsList,04
 src/AppNavigator,04
 src/GlobalStyles,04
 src/API/Institutions,04

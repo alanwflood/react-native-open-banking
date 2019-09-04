@@ -36,8 +36,12 @@ module Login = {
     let user = json =>
       Success(
         Json.Decode.{
-          /* User token can be an empty string until updated */
-          token: json |> field("token", withDefault("", string)),
+          /* Token is not found in the initial response but will be stored later on in async-storage */
+          token:
+            Belt.Option.getWithDefault(
+              json |> optional(field("token", string)),
+              "",
+            ),
           createdDate:
             json
             |> field(

@@ -23,7 +23,7 @@ function LoadingScreen(Props) {
                     return /* () */0;
                   });
         }), ([]));
-  var match$2 = match$1[0] === 0;
+  var match$2 = match$1[0] < 0;
   return React.createElement(ReactNative.View, {
               style: GlobalStyles.styles.container,
               children: null
