@@ -1,5 +1,4 @@
 open ReactNative;
-open ReactNavigation;
 open GlobalStyles;
 
 [@react.component]

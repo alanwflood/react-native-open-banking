@@ -1,12 +1,11 @@
 5.0.6
 1
-19
+18
 App
 Auth
 User
 Icons
 Utils
-Global
 SignIn
 Webview
 Accounts
@@ -23,9 +22,8 @@ AccountsLoading
 src/App,04
 src/Context/Auth,04
 src/API/User,04
-src/Icons,04
+src/Components/Icons,04
 src/Utils,04
-src/Context/Global,04
 src/Pages/SignIn,04
 src/Pages/Webview,04
 src/Pages/Accounts,04
