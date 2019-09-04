@@ -78,8 +78,9 @@ let navigator =
         ~tabBarOptions=
           tabBarOptions(
             ~activeTintColor=GlobalStyles.colors.primary,
-            ~inactiveTintColor="grey",
-            ~style=Style.style(~backgroundColor="white", ()),
+            ~inactiveTintColor=GlobalStyles.colors.inactive,
+            ~style=
+              Style.style(~backgroundColor=GlobalStyles.colors.textLight, ()),
             ~indicatorStyle=
               Style.style(~backgroundColor=GlobalStyles.colors.primary, ()),
             (),

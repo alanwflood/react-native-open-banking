@@ -67,7 +67,7 @@ Webview.navigationOptions = (function (params) {
             headerTitleStyle: {
               fontWeight: "bold"
             },
-            headerTintColor: GlobalStyles.colors[/* textLight */4],
+            headerTintColor: GlobalStyles.colors[/* textLight */5],
             headerStyle: {
               backgroundColor: GlobalStyles.colors[/* primary */1]
             }

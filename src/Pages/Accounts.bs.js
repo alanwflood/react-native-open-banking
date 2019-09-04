@@ -67,12 +67,12 @@ var $$navigator = ReactNavigation.createMaterialTopTabNavigator({
     }, {
       tabBarOptions: {
         activeTintColor: GlobalStyles.colors[/* primary */1],
-        inactiveTintColor: "grey",
+        inactiveTintColor: GlobalStyles.colors[/* inactive */3],
         indicatorStyle: {
           backgroundColor: GlobalStyles.colors[/* primary */1]
         },
         style: {
-          backgroundColor: "white"
+          backgroundColor: GlobalStyles.colors[/* textLight */5]
         }
       }
     });

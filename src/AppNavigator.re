@@ -76,7 +76,7 @@ module AppStack = {
             ~tabBarOptions=
               tabBarOptions(
                 ~activeTintColor=GlobalStyles.colors.primary,
-                ~inactiveTintColor="grey",
+                ~inactiveTintColor=GlobalStyles.colors.inactive,
                 (),
               ),
             (),

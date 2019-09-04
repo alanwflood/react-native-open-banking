@@ -72,7 +72,7 @@ var routes$2 = {
 var $$navigator$2 = ReactNavigation.createBottomTabNavigator(routes$2, {
       tabBarOptions: {
         activeTintColor: GlobalStyles.colors[/* primary */1],
-        inactiveTintColor: "grey"
+        inactiveTintColor: GlobalStyles.colors[/* inactive */3]
       }
     });
 
