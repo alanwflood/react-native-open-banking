@@ -145,3 +145,7 @@ let login = (~email, ~password) => {
     |> catch(error => error->Login.Decode.fetchError->resolve)
   );
 };
+
+module SignUp = {
+  /* TODO: Add this functionality */
+};

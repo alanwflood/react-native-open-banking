@@ -39,11 +39,14 @@ let make = (~navigation) => {
           ~userUuid=[%raw "params['user-uuid']"],
           ~institutionId=params##institution,
           ~consentToken=params##consent,
+          ~reauthorise=true,
         )
-        |> then_(data => data->Js.log->resolve)
-        |> catch(_err => {
+        |> then_(data =>
+             navigation->Navigation.navigate("AccountsLoading")->resolve
+           )
+        |> catch(error => {
              ammendError();
-             _err->Js.log->resolve;
+             Js.log2("Error in ammending consent:", error)->resolve;
            })
       )
       |> ignore
@@ -56,7 +59,7 @@ let make = (~navigation) => {
       _event =>
         goBackWithError(
           ~message=
-            "Failed to reach bank's authentication service, please try again later",
+            "Failed to reach provider's authentication service, please try again later",
         )
     }
     renderLoading={_ => <LoadingScreen />}

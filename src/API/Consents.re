@@ -61,7 +61,7 @@ module Decoder = {
 
 module Request = {
   let postConsentAmmendment =
-      (authToken, ~userUuid, ~institutionId, ~consentToken) => {
+      (authToken, ~userUuid, ~institutionId, ~consentToken, ~reauthorise) => {
     let url = "http://localhost:8080/api/consent/";
     let payload =
       Json.Encode.(
@@ -77,7 +77,7 @@ module Request = {
     Fetch.fetchWithInit(
       url,
       Fetch.RequestInit.make(
-        ~method_=Post,
+        ~method_=reauthorise ? Patch : Post,
         ~body=Fetch.BodyInit.make(payload),
         ~headers=
           Fetch.HeadersInit.make({
@@ -107,9 +107,14 @@ module Request = {
 };
 
 exception AmmendRequestError(string);
-let ammend = (~userUuid, ~institutionId, ~consentToken) => {
+let ammend = (~userUuid, ~institutionId, ~consentToken, ~reauthorise) => {
   let request =
-    Request.postConsentAmmendment(~userUuid, ~institutionId, ~consentToken);
+    Request.postConsentAmmendment(
+      ~userUuid,
+      ~institutionId,
+      ~consentToken,
+      ~reauthorise,
+    );
   Js.Promise.(
     Auth.getAuthToken()
     |> then_(request)

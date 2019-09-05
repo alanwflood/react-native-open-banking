@@ -62,7 +62,7 @@ var Decoder = /* module */[
   /* ammendResponse */ammendResponse
 ];
 
-function postConsentAmmendment(authToken, userUuid, institutionId, consentToken) {
+function postConsentAmmendment(authToken, userUuid, institutionId, consentToken, reauthorise) {
   var payload = JSON.stringify(Json_encode.object_(/* :: */[
             /* tuple */[
               "userUuid",
@@ -88,7 +88,7 @@ function postConsentAmmendment(authToken, userUuid, institutionId, consentToken)
               ]
             ]
           ]));
-  return fetch("http://localhost:8080/api/consent/", Fetch.RequestInit[/* make */0](/* Post */2, {
+  return fetch("http://localhost:8080/api/consent/", Fetch.RequestInit[/* make */0](reauthorise ? /* Patch */8 : /* Post */2, {
                     "Content-Type": "application/json",
                     "x-auth-token": authToken
                   }, Caml_option.some(payload), undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined)(/* () */0));
@@ -108,9 +108,9 @@ var $$Request = /* module */[
 
 var AmmendRequestError = Caml_exceptions.create("Consents.AmmendRequestError");
 
-function ammend(userUuid, institutionId, consentToken) {
+function ammend(userUuid, institutionId, consentToken, reauthorise) {
   var request = function (param) {
-    return postConsentAmmendment(param, userUuid, institutionId, consentToken);
+    return postConsentAmmendment(param, userUuid, institutionId, consentToken, reauthorise);
   };
   return Auth.getAuthToken(/* () */0).then(request).then((function (prim) {
                     return prim.json();

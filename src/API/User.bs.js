@@ -171,9 +171,12 @@ function login$2(email, password) {
               }));
 }
 
+var SignUp = /* module */[];
+
 export {
   Login ,
   login$2 as login,
+  SignUp ,
   
 }
 /* react-native Not a pure module */

@@ -26,11 +26,11 @@ function Webview(Props) {
     console.log("params recieved:", params);
     var match = params.error;
     if (match == null) {
-      Consents.ammend((params['user-uuid']), params.institution, params.consent).then((function (data) {
-                return Promise.resolve((console.log(data), /* () */0));
-              })).catch((function (_err) {
+      Consents.ammend((params['user-uuid']), params.institution, params.consent, true).then((function (data) {
+                return Promise.resolve((navigation.navigate("AccountsLoading"), /* () */0));
+              })).catch((function (error) {
               goBackWithError(bankName + "'s authentication system responded with an error, please try again later");
-              return Promise.resolve((console.log(_err), /* () */0));
+              return Promise.resolve((console.log("Error in ammending consent:", error), /* () */0));
             }));
       return /* () */0;
     } else {
@@ -41,7 +41,7 @@ function Webview(Props) {
   };
   return React.createElement(ReactNative.WebView, {
               onError: (function (_event) {
-                  return goBackWithError("Failed to reach bank's authentication service, please try again later");
+                  return goBackWithError("Failed to reach provider's authentication service, please try again later");
                 }),
               onShouldStartLoadWithRequest: (function (request) {
                   if (authSuccess(request.url)) {
